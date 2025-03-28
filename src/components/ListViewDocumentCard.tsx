@@ -30,6 +30,7 @@ import { createStyles } from "antd-style";
 import qrCode from "../assets/qrcode.png";
 
 import ltzLogo from "../assets/ltz.png";
+
 import ActivityTimeLine from "./ActivityTimeline";
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
