@@ -17,6 +17,7 @@ const DocumentsCreate = (params: any) => {
 
   const onPost = (data: any) => {
     // This would typically be an API call to save your form
+    localStorage.setItem("form_data", JSON.stringify(data.task_data));
     console.log("Form data:", data);
     setFormData(data.task_data);
   };

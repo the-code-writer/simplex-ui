@@ -479,3 +479,29 @@ div.container.mt-4 {
   border-radius: 10px;
   margin-top: -18px;
 }
+
+.form-generator-container > div {
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 16px;
+}
+
+.react-form-builder-form .rfb-item .row {
+  padding: 0 0px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  margin-top: -18px;
+}
+
+.react-form-builder-form .rfb-item label span {
+  background: #fff;
+  font-weight: bold;
+  padding: 0 10px 0 0;
+}
+
+.rfb-item h3.static{
+    margin-bottom: .5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    font-size: 1.25rem !important;
+  }

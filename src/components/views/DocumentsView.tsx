@@ -1,12 +1,18 @@
 import { Breadcrumb, Row, Col, Tabs, Flex, Button } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { documents } from "../../libs/documentGenerator";
+//import { documentItems } from "../../libs/documentItemGenerator";
 import DashboardCard from "../DashboardCard";
-import ListViewDocumentCard from "../ListViewDocumentCard";
-import { useState } from "react";
-import ListViewDocumentItemCard from "../ListViewDocumentItemCard";
+import { useEffect, useState } from "react";
+import DocumentTemplateListItem from "../DocumentTemplateListItem.tsx";
+import { AxiosAPI } from "../../libs/AxiosAPI";
+
+const api = new AxiosAPI("http://192.168.100.23:8081");
+
+// Set authentication token if required
+api.setAuthToken(
+  "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInNjb3BlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaXNzIjoiaHR0cDovL2luYm94LmNvLnp3IiwiaWF0IjoxNzQ0MjA3OTcwLCJleHAiOjE3NDQyMjU5NzB9.06SgtZVi2eZebncrAk_tsYkc7-Kry505f5gfb8Mf0IE");
+
 
 const DocumentsView = (params: any) => {
   const {
@@ -27,12 +33,26 @@ const DocumentsView = (params: any) => {
 
   const { Title } = Typography;
 
-  const [ cards, setCards ] = useState([]);
+  const [cards, setCards] = useState([]);
+
+  const [documentItems, setDocumentItems] = useState([]);
+  
+  useEffect(() => {
+    api
+      .getAllDocumentTemplates()
+      .then((templates) => {
+        console.log("All templates:", templates);
+        setDocumentItems(templates);
+      })
+      .catch((error) => {
+        console.error("Retrieval failed:", error);
+      });
+  }, [api]);
 
   return (
     <>
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-        <Title level={1}>My Documents</Title>
+        <Title level={1}>Document Templates</Title>
 
         <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item>Home</Breadcrumb.Item>
@@ -80,11 +100,8 @@ const DocumentsView = (params: any) => {
                 onChange={onTabChange}
               />
               <Flex gap="small" wrap>
-                <Button onClick={() => setModal2Open(true)}>
-                  New Customer
-                </Button>
                 <Button type="primary" onClick={() => setModal1Open(true)}>
-                  New SO
+                  New Document
                 </Button>
               </Flex>
             </div>
@@ -94,7 +111,7 @@ const DocumentsView = (params: any) => {
         <div className="h-24"></div>
 
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {documents.map((doc: any, docIndex: number) => (
+          {documentItems.map((docItem: any, docIndex: number) => (
             <Col
               key={docIndex}
               className="gutter-row"
@@ -104,8 +121,8 @@ const DocumentsView = (params: any) => {
               lg={24}
               xl={24}
             >
-              <ListViewDocumentItemCard
-                doc={doc}
+              <DocumentTemplateListItem
+                docItem={docItem}
                 setModal3Open={setModal3Open}
                 setModal4Open={setModal4Open}
                 setModal5Open={setModal5Open}

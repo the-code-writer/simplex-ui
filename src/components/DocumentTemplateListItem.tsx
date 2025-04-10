@@ -35,6 +35,7 @@ import ActivityTimeLine from "./ActivityTimeline";
 import { ReactFormGenerator } from "react-form-builder2";
 import { adaptFormData } from "../libs/FormAdapter";
 import { FormBuilderForm } from "../libs/DocumentAdapter";
+import { FormBuilderAdapter } from "../libs/FormBuilderAdaptor";
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -62,8 +63,7 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
   `,
 }));
 
-
-const ListViewDocumentItemCard: React.FC = (params: any) => {
+const DocumentTemplateListItem: React.FC = (params: any) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -79,14 +79,16 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
   */
 
   const [modal1Open, setModal1Open] = useState(false);
-  const [formData, setFormData] = useState <FormBuilderForm|any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
+  const [formData, setFormData] = useState<FormBuilderForm | any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
 
   useEffect(() => {
-    const formBuilderData = adaptFormData(docItem.FormData);
 
-    console.log("FORM DATA", formBuilderData);
-
-    setFormData(formBuilderData);
+    const reactForm = FormBuilderAdapter.toReactFormat(docItem);
+    
+    console.log("DOCUMENT ITEM::", docItem);
+    console.log("React Form:001:", JSON.stringify(reactForm.task_data, null, 2));
+    console.log("React Form:002:", reactForm.task_data);
+    setFormData(reactForm.task_data);
 
   }, [docItem]);
 
@@ -99,7 +101,7 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
     message.info("Click on menu item.");
     console.log("click", e.key);
     switch (e.key) {
-      case "so_details": {
+      case "doc_temp_details": {
         setModal1Open(true);
         break;
       }
@@ -127,60 +129,61 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
 
   const items: MenuProps["items"] = [
     {
-      label: "View SO Details",
-      key: "so_details",
+      label: "View Template Details",
+      key: "doc_temp_details",
       icon: <FileOutlined />,
     },
     {
-      label: "Update Flag",
+      label: "View Documents (34)",
+      key: "doc_temp_docs",
+      icon: <FileOutlined />,
+    },
+    {
+      label: "Update Title",
       key: "so_task",
       icon: <FlagOutlined />,
     },
     {
-      label: "Allocations",
+      label: "Update Description",
       key: "2",
       icon: <UsergroupAddOutlined />,
     },
     {
-      label: "Contractor BOQ",
+      label: "Update Version Number",
       key: "3",
       icon: <FileTextOutlined />,
     },
     {
-      label: "Edit SO",
+      label: "Publish Template",
       key: "3",
       icon: <EditOutlined />,
     },
     {
-      label: "Update SO Task",
+      label: "Unpublish Template",
       key: "so_task",
       icon: <EditOutlined />,
     },
     {
-      label: "Update SO Notes",
+      label: "Attach Workflow",
       key: "so_notes",
       icon: <EditOutlined />,
     },
     {
-      label: "Revert SO",
+      label: "Detach Workflow",
       key: "so_reversion",
       icon: <EditOutlined />,
-    },
-    {
-      label: "Print SO",
-      key: "6",
-      icon: <PrinterOutlined />,
-    },
-    {
-      label: "Share SO",
-      key: "7",
-      icon: <ShareAltOutlined />,
     },
   ];
 
   const menuProps = {
     items,
     onClick: handleMenuClick,
+  };
+
+  const saveFormData = (formData:any) => {
+
+    console.log("SAVE_FORM_DATA", formData);
+
   };
 
   return (
@@ -196,50 +199,37 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
         }}
       >
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          <Col className="gutter-row" xs={24} sm={24} md={12} lg={8} xl={8}>
-            <div className="label-value-pair doc-title">
+          <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
+            <div className="label-value-pair doc-descriptio10n">
               <span className="label">Title:</span>
-              <span className="value single-liner">{docItem.Title}</span>
+              <span className="value multi-liner">{docItem.title}</span>
             </div>
             <div className="label-value-pair doc-description">
               <span className="label">Description:</span>
-              <span className="value multi-liner">{docItem.Description}</span>
+              <span className="value multi-liner">{docItem.description}</span>
             </div>
-          </Col>
-          <Col className="gutter-row" xs={24} sm={24} md={12} lg={7} xl={7}>
             <div className="label-value-pair doc-version">
               <span className="label">Version:</span>
-              <span className="value single-liner">{docItem.Version}</span>
-            </div>
-            <div className="label-value-pair doc-workflow">
-              <span className="label">Workflow ID:</span>
-              <span className="value single-liner">{docItem.WorkflowID}</span>
-            </div>
-            <div className="label-value-pair doc-type">
-              <span className="label">{docItem.DocumentItemType.Label}:</span>
-              <span className="value single-liner">
-                {docItem.DocumentItemType.Value}
-              </span>
+              <span className="value single-liner">{docItem.version||"1.0.0"}</span>
             </div>
           </Col>
-          <Col className="gutter-row" xs={24} sm={24} md={12} lg={5} xl={5}>
-            <div className="label-value-pair doc-created-at">
-              <span className="label">{docItem.CreatedAt.Label}:</span>
-              <span className="value single-liner">
-                {docItem.CreatedAt.Value}
-              </span>
+          <Col className="gutter-row" xs={24} sm={24} md={8} lg={8} xl={8}>
+            <div className="label-value-pair doc-date-created">
+              <span className="label">Date Created:</span>
+              <span className="value single-liner">{docItem.datecreated}</span>
             </div>
-            <div className="label-value-pair doc-updated-at">
-              <span className="label">{docItem.UpdatedAt.Label}:</span>
+            <div className="label-value-pair doc-date-updated">
+              <span className="label">Created By:</span>
               <span className="value single-liner">
-                {docItem.UpdatedAt.Value}
+                {docItem.createdby.firstname}
               </span>
             </div>
             <div className="label-value-pair doc-status">
-              <span className="status single-liner">{docItem.Status}</span>
+              <span className="label">Current Status:</span>
+              <span className="value single-liner">Draft</span>
             </div>
           </Col>
-          <Col className="gutter-row" xs={24} sm={24} md={12} lg={4} xl={4}>
+          <Col className="gutter-row" xs={24} sm={24} md={2} lg={2} xl={2}>
             <div className="doc-action-button">
               <ConfigProvider
                 button={{
@@ -261,7 +251,7 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
       </div>
       <Modal
         centered
-        title={"Document Details"}
+        title={"Document Template Details"}
         style={{ top: 20 }}
         width={1320}
         open={modal1Open}
@@ -285,7 +275,7 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
         </Flex>
 
         <div className="h-32" />
-        <span className="ant-modal-card-title">{docItem.Title}</span>
+        <span className="ant-modal-card-title">{docItem.title}</span>
         <div className="h-8" />
         <div
           className="dashboard-card shadow-1 document-details"
@@ -299,40 +289,34 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
           <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
             <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
               <div className="label-value-pair doc-description">
+                <span className="label">Title:</span>
+                <span className="value multi-liner">{docItem.title}</span>
+              </div>
+              <div className="label-value-pair doc-description">
                 <span className="label">Description:</span>
-                <span className="value multi-liner">{docItem.Description}</span>
+                <span className="value multi-liner">{docItem.description}</span>
               </div>
               <div className="label-value-pair doc-version">
                 <span className="label">Version:</span>
-                <span className="value single-liner">{docItem.Version}</span>
-              </div>
-              <div className="label-value-pair doc-workflow">
-                <span className="label">Workflow ID:</span>
-                <span className="value single-liner">{docItem.WorkflowID}</span>
+                <span className="value single-liner">{docItem.version}</span>
               </div>
             </Col>
             <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
-              <div className="label-value-pair doc-type">
-                <span className="label">{docItem.DocumentItemType.Label}:</span>
-                <span className="value single-liner">
-                  {docItem.DocumentItemType.Value}
-                </span>
-              </div>
               <div className="label-value-pair doc-date-created">
-                <span className="label">{docItem.CreatedAt.Label}:</span>
+                <span className="label">Date Created:</span>
                 <span className="value single-liner">
-                  {docItem.CreatedAt.Value}
+                  {docItem.datecreated}
                 </span>
               </div>
               <div className="label-value-pair doc-date-updated">
-                <span className="label">{docItem.UpdatedAt.Label}:</span>
+                <span className="label">Created By:</span>
                 <span className="value single-liner">
-                  {docItem.UpdatedAt.Value}
+                  {docItem.createdby.firstname}
                 </span>
               </div>
               <div className="label-value-pair doc-status">
                 <span className="label">Current Status:</span>
-                <span className="value single-liner">{docItem.Status}</span>
+                <span className="value single-liner">Draft</span>
               </div>
             </Col>
           </Row>
@@ -350,11 +334,12 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+          <Row className="form-generator-container" gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
             <ReactFormGenerator
               form_action="/path/to/submit"
               form_method="POST"
               data={formData}
+              onSubmit={saveFormData}
             />
           </Row>
         </div>
@@ -363,4 +348,4 @@ const ListViewDocumentItemCard: React.FC = (params: any) => {
   );
 };
 
-export default ListViewDocumentItemCard;
+export default DocumentTemplateListItem;

@@ -7,21 +7,27 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test-axios": "tsx watch --clear-screen=false src/libs/example-axios.ts | pino-pretty"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@types/react-router-dom": "^5.3.3",
     "antd": "^5.24.6",
     "antd-style": "^3.7.1",
+    "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "connect-mongo": "^5.1.0",
     "global": "^4.4.0",
+    "pino-pretty": "^13.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-form-builder2": "^0.18.4",
     "react-infinite-scroll-component": "^6.1.0",
-    "react-router-dom": "5"
+    "react-router-dom": "5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
