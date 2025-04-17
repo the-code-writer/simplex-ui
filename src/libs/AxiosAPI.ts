@@ -151,7 +151,7 @@ export interface DocumentTemplateResponse {
 export class AxiosAPI {
     private axiosInstance: AxiosInstance;
     private baseURL: string;
-    private authToken: string | null = null;
+    private authToken: string | null = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInNjb3BlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaXNzIjoiaHR0cDovL2luYm94LmNvLnp3IiwiaWF0IjoxNzQ0MzcyMjA5LCJleHAiOjE3NDQzOTAyMDl9.xuXCqB40mXtyGo5NgY_DxuRhoYIrcWODwBWcpVereUQ";
 
     /**
      * Creates an instance of the AxiosAPI class
@@ -250,4 +250,98 @@ export class AxiosAPI {
             throw error;
         }
     }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getAllDocumentJobs(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                '/api/v1/document/listbytemplate/' + id
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error getting all document templates:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async assignToWorkflow(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.put(
+                `/api/v1/document/${id}/advance`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async revertJob(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.put(
+                `/api/v1/document/${id}/revert`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async advanceJob(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.put(
+                `/api/v1/document/${id}/advance`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getWorkflowStageTasks(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/task/listbyworkflowstageid/${id}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    async saveDocument(data:any): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/document',
+                data
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving document', error);
+            throw error;
+        }
+    }
+
 }

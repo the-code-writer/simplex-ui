@@ -119,6 +119,27 @@ export interface BackendForm {
     listsections: BackendSection[];
 }
 
+
+// SAVE DATA
+
+export interface FieldValue {
+    id: string;
+    name: string;
+    custom_name: string;
+    value: string;
+}
+
+export interface SaveDocumentRequest {
+    title: string;
+    description: string;
+    templateid: string;
+    workflowid: string;
+    listfieldvalues: Array<{
+        templatefieldid: string;
+        value: string;
+    }>;
+}
+
 // ==================== ADAPTER CLASS ====================
 
 export class FormBuilderAdapter {
@@ -164,7 +185,7 @@ export class FormBuilderAdapter {
 
                 // Create new section
                 currentSection = {
-                    id: this.generateId(),
+                    id: item.id || this.generateId(),
                     sectionorder: sectionOrder++,
                     sectiontitle: item.content,
                     showsectiontitle: true,
@@ -300,8 +321,8 @@ export class FormBuilderAdapter {
                 parentIndexCounter++;
 
                 // Process fields in subsection
-                subsection.listfields.forEach((field, index) => {
-                    const fieldId = this.generateId();
+                subsection.listfields.forEach((field:any, index) => {
+                    const fieldId = field.id || this.generateId();
                     childItems.push(fieldId);
 
                     const reactElement = this.createReactInputElement(
@@ -354,8 +375,8 @@ export class FormBuilderAdapter {
     private static mapOptions(
         options: Array<{ value: string; text: string; key: string }>
     ): BackendOption[] {
-        return options.map((opt) => ({
-            id: this.generateId(),
+        return options.map((opt:any) => ({
+            id: opt.id || this.generateId(),
             option: opt.text,
         }));
     }
@@ -425,10 +446,77 @@ export class FormBuilderAdapter {
     }
 
     private static generateId(): string {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        return 'doc-xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
             const r = (Math.random() * 16) | 0;
             const v = c === 'x' ? r : (r & 0x3) | 0x8;
             return v.toString(16);
         });
     }
+
+    /**
+   * Prepares form data for saving to the backend
+   * @param formTitle The title of the form/document
+   * @param templateId The ID of the template being used
+   * @param workflowId The ID of the workflow (if applicable)
+   * @param fieldValues Array of field values from the form
+   * @returns Properly formatted save request object
+   */
+    static prepareSaveRequest(
+        formTitle: string,
+        formDescription: string,
+        templateId: string,
+        workflowId: string,
+        fieldValues: FieldValue[]
+    ): SaveDocumentRequest {
+        return {
+            title: formTitle,
+            description: formDescription,
+            templateid: templateId,
+            workflowid: workflowId,
+            listfieldvalues: fieldValues.map((field) => ({
+                templatefieldid: field.id,
+                value: field.value,
+            })),
+        };
+    }
+
+    /**
+     * Helper method to extract field values from form data
+     * @param formData The form data object
+     * @returns Array of field values with their IDs and values
+     */
+    static extractFieldValues(formData: any): FieldValue[] {
+        // This implementation depends on how your form data is structured
+        // Here's a basic implementation that would need to be adapted
+
+        const fieldValues: FieldValue[] = [];
+
+        // Example implementation - you'll need to adjust this based on your actual form structure
+        for (const fieldName in formData) {
+            if (formData.hasOwnProperty(fieldName)) {
+                // Extract the ID from the field name or get it from somewhere else
+                const id = this.extractIdFromFieldName(fieldName) || this.generateId();
+
+                fieldValues.push({
+                    id,
+                    name: fieldName,
+                    custom_name: fieldName,
+                    value: formData[fieldName]
+                });
+            }
+        }
+
+        return fieldValues;
+    }
+
+    private static extractIdFromFieldName(fieldName: string): string | null {
+        // Implement logic to extract ID from your field names
+        // Example: if field names are like "text_d3ea6d30-fe89-4e43-9e06-c1e685f30f59"
+        const parts = fieldName.split('_');
+        if (parts.length > 1 && parts[1].match(/^[0-9a-f-]+$/)) {
+            return parts.slice(1).join('_');
+        }
+        return null;
+    }
+
 }

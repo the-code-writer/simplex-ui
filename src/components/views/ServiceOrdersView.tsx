@@ -2,7 +2,6 @@ import { Breadcrumb, Row, Col, Tabs, Flex, Button } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { documents } from "../../libs/documentGenerator";
 import DashboardCard from "../DashboardCard";
 import ListViewDocumentCard from "../ListViewDocumentCard";
 

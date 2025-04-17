@@ -480,7 +480,7 @@ div.container.mt-4 {
   margin-top: -18px;
 }
 
-.form-generator-container > div {
+.form-generator-container>div {
   width: 100%;
   padding: 0 !important;
   margin: 0 16px;
@@ -499,9 +499,17 @@ div.container.mt-4 {
   padding: 0 10px 0 0;
 }
 
-.rfb-item h3.static{
-    margin-bottom: .5rem;
-    font-weight: 800;
-    line-height: 1.2;
-    font-size: 1.25rem !important;
+.rfb-item h3.static {
+  margin-bottom: .5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  font-size: 1.25rem !important;
+}
+
+.hide-tab-contents {
+
+  .ant-tabs-content-holder {
+    display: none !important;
   }
+
+}

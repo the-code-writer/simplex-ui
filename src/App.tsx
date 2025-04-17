@@ -39,7 +39,6 @@ import DashboardCard from "./components/DashboardCard";
 import Title from "antd/es/typography/Title";
 import ListViewDocumentCard from "./components/ListViewDocumentCard";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { documents } from "./libs/documentGenerator";
 import UserContactCard from "./components/UserContactCard";
 import CustomerContactCard from "./components/CustomerContactCard";
 import TextArea from "antd/es/input/TextArea";
@@ -47,6 +46,7 @@ import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-
 import ServiceOrdersView from "./components/views/ServiceOrdersView";
 import DocumentsView from "./components/views/DocumentsView";
 import DocumentsCreate from "./components/views/DocumentsCreate";
+import JobsView from "./components/views/JobsView";
 const { Header, Content, Footer, Sider } = Layout;
 
 const siderStyle: React.CSSProperties = {
@@ -219,12 +219,6 @@ const App: React.FC = () => {
   };
 
   const loadMoreItems = () => {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const nextItems = documents.slice(startIndex, endIndex);
-
-    setItemsToShow((prevItems: any) => [...prevItems, ...nextItems]);
-    setPage((prevPage) => prevPage + 1);
   };
 
   const tabItems: TabsProps["items"] = [
@@ -325,6 +319,9 @@ const App: React.FC = () => {
             </Route>
             <Route path="/documents/list">
               <DocumentsView />
+            </Route>
+            <Route path="/documents/jobs/list">
+              <JobsView />
             </Route>
             <Route path="/documents/new">
               <DocumentsCreate />
@@ -2130,7 +2127,6 @@ const App: React.FC = () => {
           </div>
         </Space>
       </Modal>
-      
     </Router>
   );
 };

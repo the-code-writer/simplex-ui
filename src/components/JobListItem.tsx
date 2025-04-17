@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Avatar,
-  Badge,
   Col,
   ConfigProvider,
   Dropdown,
@@ -9,21 +7,10 @@ import {
   MenuProps,
   message,
   Modal,
-  Popover,
   Row,
   theme,
 } from "antd";
-import {
-  EditOutlined,
-  EditTwoTone,
-  FileOutlined,
-  FileTextOutlined,
-  FlagOutlined,
-  PrinterOutlined,
-  ShareAltOutlined,
-  UsergroupAddOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import { FileOutlined, FlagOutlined } from "@ant-design/icons";
 
 import { createStyles } from "antd-style";
 
@@ -31,11 +18,9 @@ import qrCode from "../assets/qrcode.png";
 
 import ltzLogo from "../assets/ltz.png";
 
-import ActivityTimeLine from "./ActivityTimeline";
+//import ActivityTimeLine from "./ActivityTimeline";
 import { ReactFormGenerator } from "react-form-builder2";
-import { adaptFormData } from "../libs/FormAdapter";
-import { FormBuilderForm } from "../libs/DocumentAdapter";
-import { FormBuilderAdapter } from "../libs/FormBuilderAdaptor";
+import { FieldValue, FormBuilderAdapter } from "../libs/FormBuilderAdaptor";
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -63,34 +48,57 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
   `,
 }));
 
-const DocumentTemplateListItem: React.FC = (params: any) => {
+interface Task {
+  description: string | null;
+  id: string;
+  datecreated: string | null;
+  createdby: {
+    email: string | null;
+    firstname: string | null;
+    id: string;
+    middlename: string | null;
+    lastname: string | null;
+    enabled: boolean;
+  };
+  deleted: boolean;
+  task: string;
+  stage: string | null;
+  taskorder: number;
+}
+
+interface MenuItem {
+  label: string;
+  key: string;
+  icon: React.ReactNode;
+}
+
+function convertTasksToMenuItems(tasks: Task[]): MenuItem[] {
+  return tasks.map((task) => ({
+    label: task.task, // Use the 'task' property as label
+    key: task.id, // Use the 'id' property as key
+    icon: <FileOutlined />, // Use FileOutlined icon for all items
+  }));
+}
+
+const JobListItem: React.FC = (params: any) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const { docItem, setModal3Open, setModal4Open, setModal5Open } = params;
+  const {
+    api,
+    captureAndSaveFormData,
+    docItem,
+    setModal3Open,
+    setModal4Open,
+    setModal5Open,
+  } = params;
 
   const { styles } = useStyle();
-
-  /*
-  const formDataFromLS = localStorage.getItem("form_data");
-  const formDataFromLSParsed = JSON.parse(String(formDataFromLS));
-
-  console.log("formDataFromLS", formDataFromLSParsed);
-  */
 
   const [modal1Open, setModal1Open] = useState(false);
   const [formData, setFormData] = useState<FormBuilderForm | any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
 
-  useEffect(() => {
-
-    const reactForm = FormBuilderAdapter.toReactFormat(docItem);
-    
-    console.log("DOCUMENT ITEM::", docItem);
-    console.log("React Form:001:", JSON.stringify(reactForm.task_data, null, 2));
-    console.log("React Form:002:", reactForm.task_data);
-    setFormData(reactForm.task_data);
-
-  }, [docItem]);
+  useEffect(() => {}, [docItem]);
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     message.info("Click on left button.");
@@ -98,26 +106,52 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
   };
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
-    message.info("Click on menu item.");
-    console.log("click", e.key);
+    console.log("click ::: 1", e.key);
+
     switch (e.key) {
-      case "doc_temp_details": {
+      case "job_view": {
         setModal1Open(true);
         break;
       }
 
-      case "so_task": {
-        setModal3Open(true);
+      case "doc_temp_docs": {
+        window.location.href = `/documents/jobs?id=${docItem.id}`;
         break;
       }
 
-      case "so_notes": {
-        setModal4Open(true);
+      case "job_publish": {
+        api
+          .assignToWorkflow(docItem.id)
+          .then((res: any) => {
+            console.log("JOB PUBLISH", res);
+          })
+          .catch((error: any) => {
+            console.error("JOB PUBLISH ERROR", error);
+          });
         break;
       }
 
-      case "so_reversion": {
-        setModal5Open(true);
+      case "job_advance": {
+        api
+          .advanceJob(docItem.id)
+          .then((res: any) => {
+            console.log("JOB PUBLISH", res);
+          })
+          .catch((error: any) => {
+            console.error("JOB PUBLISH ERROR", error);
+          });
+        break;
+      }
+
+      case "job_revert": {
+        api
+          .revertJob(docItem.id)
+          .then((res: any) => {
+            console.log("JOB REVERT", res);
+          })
+          .catch((error: any) => {
+            console.error("JOB REVERT ERROR", error);
+          });
         break;
       }
 
@@ -129,62 +163,124 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
 
   const items: MenuProps["items"] = [
     {
-      label: "View Template Details",
-      key: "doc_temp_details",
+      label: "View Job",
+      key: "job_view",
       icon: <FileOutlined />,
     },
     {
-      label: "View Documents (34)",
-      key: "doc_temp_docs",
+      label: "Publish Job",
+      key: "job_publish",
       icon: <FileOutlined />,
     },
     {
-      label: "Update Title",
-      key: "so_task",
-      icon: <FlagOutlined />,
+      label: "Unpublish Job",
+      key: "job_unpublish",
+      icon: <FileOutlined />,
     },
     {
-      label: "Update Description",
-      key: "2",
-      icon: <UsergroupAddOutlined />,
+      label: "Archive Job",
+      key: "job_archive",
+      icon: <FileOutlined />,
     },
     {
-      label: "Update Version Number",
-      key: "3",
-      icon: <FileTextOutlined />,
+      label: "Advance Job",
+      key: "job_advance",
+      icon: <FileOutlined />,
     },
     {
-      label: "Publish Template",
-      key: "3",
-      icon: <EditOutlined />,
+      label: "Revert Job",
+      key: "job_revert",
+      icon: <FileOutlined />,
     },
     {
-      label: "Unpublish Template",
-      key: "so_task",
-      icon: <EditOutlined />,
+      label: "Move Job",
+      key: "job_move",
+      icon: <FileOutlined />,
     },
-    {
-      label: "Attach Workflow",
-      key: "so_notes",
-      icon: <EditOutlined />,
-    },
-    {
-      label: "Detach Workflow",
-      key: "so_reversion",
-      icon: <EditOutlined />,
-    },
+    
   ];
 
+  /*
   const menuProps = {
     items,
     onClick: handleMenuClick,
   };
+  */
 
-  const saveFormData = (formData:any) => {
+  const [formDataObject, setFormDataObject] = useState({});
 
+  const saveFormData = (formData: any) => {
     console.log("SAVE_FORM_DATA", formData);
-
+    setFormDataObject(formData);
   };
+
+  const submitFormData = () => {
+    console.log("SUBMIT_FORM_DATA", formDataObject);
+    captureAndSaveFormData(docItem.id, formDataObject);
+  };
+
+  const [menuProps, setMenuProps] = useState<any>({
+    items: [],
+    onClick: handleMenuClick,
+  });
+
+  const [stageTasksList, setStageTasksLists] = useState<any>([]);
+
+  useEffect(() => {
+    console.log("CONVERTED TASKS @@@@@@", stageTasksList); 
+
+    const subMenued = {
+      label: "Stage Tasks",
+      key: "job_tasks",
+      icon: <FileOutlined />,
+      children: stageTasksList,
+    };
+      
+    items.push(subMenued);
+
+
+  setMenuProps({
+    items,
+    onClick: handleMenuClick,
+  });
+
+  }, [stageTasksList]);
+
+  useEffect(() => {
+    // nget the doc stage
+
+    const docstage = docItem.liststages;
+
+    if (docstage) {
+      const latestWorkflowStage = docstage[0];
+
+      if (latestWorkflowStage && "id" in latestWorkflowStage) {
+        console.log("LATEST WORKFLOW STAGES", latestWorkflowStage);
+
+        console.log("LATEST WORKFLOW STAGE", latestWorkflowStage.stage);
+
+        console.log("LATEST WORKFLOW STAGE ID", latestWorkflowStage.stage.id);
+
+        const stageId = latestWorkflowStage.stage.id;
+
+        api
+          .getWorkflowStageTasks(stageId)
+          .then((res: any) => {
+            console.log("STAGE TASKS", res);
+            const sortedTasks = [...res].sort(
+              (a, b) => a.taskorder - b.taskorder
+            );
+            console.log("SORTED TASKS", sortedTasks);
+            const convertedTasks = convertTasksToMenuItems(sortedTasks);
+            console.log("CONVERTED TASKS", convertedTasks);
+            setStageTasksLists(convertedTasks);
+          })
+          .catch((error: any) => {
+            console.error("STAGE TASKS ERROR", error);
+          });
+      }
+    }
+  }, [docItem]);
 
   return (
     <>
@@ -208,10 +304,6 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
               <span className="label">Description:</span>
               <span className="value multi-liner">{docItem.description}</span>
             </div>
-            <div className="label-value-pair doc-version">
-              <span className="label">Version:</span>
-              <span className="value single-liner">{docItem.version||"1.0.0"}</span>
-            </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={8} lg={8} xl={8}>
             <div className="label-value-pair doc-date-created">
@@ -220,9 +312,7 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
             </div>
             <div className="label-value-pair doc-date-updated">
               <span className="label">Created By:</span>
-              <span className="value single-liner">
-                {docItem.createdby.firstname}
-              </span>
+              <span className="value single-liner">{docItem.createdby}</span>
             </div>
             <div className="label-value-pair doc-status">
               <span className="label">Current Status:</span>
@@ -255,7 +345,7 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
         style={{ top: 20 }}
         width={1320}
         open={modal1Open}
-        onOk={() => setModal1Open(false)}
+        onOk={() => submitFormData()}
         onCancel={() => setModal1Open(false)}
       >
         <Flex align="flex-start" justify="space-between">
@@ -296,10 +386,6 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
                 <span className="label">Description:</span>
                 <span className="value multi-liner">{docItem.description}</span>
               </div>
-              <div className="label-value-pair doc-version">
-                <span className="label">Version:</span>
-                <span className="value single-liner">{docItem.version}</span>
-              </div>
             </Col>
             <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
               <div className="label-value-pair doc-date-created">
@@ -310,9 +396,7 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
               </div>
               <div className="label-value-pair doc-date-updated">
                 <span className="label">Created By:</span>
-                <span className="value single-liner">
-                  {docItem.createdby.firstname}
-                </span>
+                <span className="value single-liner">{docItem.createdby}</span>
               </div>
               <div className="label-value-pair doc-status">
                 <span className="label">Current Status:</span>
@@ -334,12 +418,16 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <Row className="form-generator-container" gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+          <Row
+            className="form-generator-container"
+            gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
+          >
             <ReactFormGenerator
               form_action="/path/to/submit"
               form_method="POST"
               data={formData}
-              onSubmit={saveFormData}
+              onChange={saveFormData}
+              submitButton={<></>}
             />
           </Row>
         </div>
@@ -348,4 +436,4 @@ const DocumentTemplateListItem: React.FC = (params: any) => {
   );
 };
 
-export default DocumentTemplateListItem;
+export default JobListItem;

@@ -2,18 +2,33 @@ import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 //import { documentItems } from "../../libs/documentItemGenerator";
-import DashboardCard from "../DashboardCard";
+import DashboardCard from "../DashboardCard.tsx";
 import { useEffect, useState } from "react";
-import { AxiosAPI } from "../../libs/AxiosAPI";
+import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import { FormBuilderAdapter } from "../../libs/FormBuilderAdaptor.ts";
-import DocumentListItem from '../DocumentListItem';
+import JobListItem from '../JobListItem';
 
 const api = new AxiosAPI("http://192.168.100.23:8081");
 
 const breadcrumbItems = [
   { title: "Home" },
   { title: "Documents" },
+  { title: "Jobs" },
 ];
+
+function getUrlParameter<T extends string | number>(name: string): T | null {
+  const params = new URLSearchParams(window.location.search);
+  const value = params.get(name);
+
+  if (value === null) return null;
+
+  // Try to convert to number if it looks like one
+  if (!isNaN(Number(value))) {
+    return Number(value) as T;
+  }
+
+  return value as T;
+}
 
 const DocumentsView = (params: any) => {
   const {
@@ -31,10 +46,11 @@ const DocumentsView = (params: any) => {
   const [documentItems, setDocumentItems] = useState([]);
 
   useEffect(() => {
+    const documentId: any = getUrlParameter("id");
     api
-      .getAllDocumentTemplates()
-      .then((templates:any) => {
-        console.log("All templates:", templates);
+      .getAllDocumentJobs(documentId)
+      .then((templates: any) => {
+        console.log("All JObs:", templates);
         setDocumentItems(templates);
       })
       .catch((error) => {
@@ -75,20 +91,30 @@ const DocumentsView = (params: any) => {
     const tabItems: TabsProps["items"] = [
       {
         key: "1",
-        label: "Documents",
-        children: "Content of Tab Pane 1",
+        label: "My Jobs",
+        children: "",
       },
       {
         key: "2",
-        label: "Revisions",
-        children: "Content of Tab Pane 3",
+        label: "My Drafts",
+        children: "",
+      },
+      {
+        key: "3",
+        label: "Unpublished Jobs",
+        children: "",
+      },
+      {
+        key: "4",
+        label: "Archived Jobs",
+        children: "",
       },
     ];
     
   return (
     <>
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-        <Title level={1}>Documents</Title>
+        <Title level={1}>Jobs</Title>
 
         <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
 
@@ -135,9 +161,9 @@ const DocumentsView = (params: any) => {
               <Flex gap="small" wrap>
                 <Button
                   type="primary"
-                  onClick={() => (window.location.href = "/documents/new")}
+                  onClick={() => (window.location.href = "/documents/jobs/new")}
                 >
-                  New Document
+                  New Job
                 </Button>
               </Flex>
             </div>
@@ -158,7 +184,8 @@ const DocumentsView = (params: any) => {
               lg={24}
               xl={24}
             >
-              <DocumentListItem
+              <JobListItem
+                api={api}
                 captureAndSaveFormData={captureAndSaveFormData}
                 docItem={docItem}
                 setModal3Open={setModal3Open}

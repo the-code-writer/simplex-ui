@@ -35,7 +35,7 @@ const DocumentsCreate = (params: any) => {
   return (
     <>
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-        <Title level={1}>Create New Document</Title>
+        <Title level={1}>New Document</Title>
 
         <Breadcrumb style={{ margin: "16px 0" }}>
           <Breadcrumb.Item>Home</Breadcrumb.Item>
