@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
+import { BackendForm } from './FormBuilderAdaptor';
 
 /**
  * Enum representing possible column count options for document sections
@@ -63,16 +64,6 @@ export interface DocumentSection {
     columncount: ColumnCount;
     listdocumentfields: DocumentField[];
     listsubsection: DocumentSubsection[];
-}
-
-/**
- * Interface for creating a new document template
- */
-export interface CreateDocumentTemplateRequest {
-    description: string;
-    title: string;
-    workflowid: string;
-    listdocumentsections: DocumentSection[];
 }
 
 /**
@@ -145,20 +136,22 @@ export interface DocumentTemplateResponse {
     listsections: SectionResponse[];
 }
 
+const tenantid: string = "882b4330-1b75-44fe-b708-d00a8936b6e5";
+
 /**
  * Class for interacting with the Document Template API
  */
 export class AxiosAPI {
     private axiosInstance: AxiosInstance;
     private baseURL: string;
-    private authToken: string | null = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInNjb3BlcyI6W3siYXV0aG9yaXR5IjoiUk9MRV9BRE1JTiJ9XSwiaXNzIjoiaHR0cDovL2luYm94LmNvLnp3IiwiaWF0IjoxNzQ0MzcyMjA5LCJleHAiOjE3NDQzOTAyMDl9.xuXCqB40mXtyGo5NgY_DxuRhoYIrcWODwBWcpVereUQ";
+    private authToken: string | null = localStorage.getItem("simplex-token");
 
     /**
      * Creates an instance of the AxiosAPI class
      * @param baseURL - The base URL for the API
      */
-    constructor(baseURL: string) {
-        this.baseURL = baseURL;
+    constructor() {
+        this.baseURL = "http://18.134.9.214:8081/";
 
         // Create Axios instance with base configuration
         this.axiosInstance = axios.create({
@@ -204,8 +197,9 @@ export class AxiosAPI {
      * @returns Promise containing the created document template
      */
     async createDocumentTemplate(
-        templateData: CreateDocumentTemplateRequest
+        templateData: BackendForm
     ): Promise<DocumentTemplateResponse> {
+        console.log(JSON.stringify(templateData))
         try {
             const response: AxiosResponse<DocumentTemplateResponse> = await this.axiosInstance.post(
                 '/api/v1/documenttemplate',
@@ -319,6 +313,70 @@ export class AxiosAPI {
      * Retrieves all document templates
      * @returns Promise containing an array of document templates
      */
+    async getWorkflows(): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/workflow/all`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getWorkflowStages(workflowID:string): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/workflowstage/listbyworkflowid/${workflowID}`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getUsers(): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/user/all`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getUserRole(): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/role/all`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignToWorkflow:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
     async getWorkflowStageTasks(id: any): Promise<DocumentTemplateResponse[]> {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
@@ -331,7 +389,59 @@ export class AxiosAPI {
         }
     }
 
-    async saveDocument(data:any): Promise<any> {
+    async saveWorkflow(title: string, description: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/workflow',
+                { title, description, tenantid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving workflow', error);
+            throw error;
+        }
+    }
+
+    async saveUser(firstname: string, lastname: string, email: string, password: string, roleid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/user',
+                { firstname, lastname, email, password, roleid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving workflow', error);
+            throw error;
+        }
+    }
+
+    async saveUserRole(role: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/role',
+                { role }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving document', error);
+            throw error;
+        }
+    }
+
+    async assignUserRole(userid: string, roleid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/userrole',
+                { userid, roleid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving document', error);
+            throw error;
+        }
+    }
+
+    async saveDocument(data: any): Promise<any> {
         try {
             const response: AxiosResponse<any> = await this.axiosInstance.post(
                 '/api/v1/document',
@@ -340,6 +450,36 @@ export class AxiosAPI {
             return response.data;
         } catch (error) {
             console.error('Error saving document', error);
+            throw error;
+        }
+    }
+
+    async addDocumentTask(documentid: string, taskid: string, message: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/document/addtask',
+                {
+                    documentid, taskid, message, attachments: [{}]
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error adding document task', error);
+            throw error;
+        }
+    }
+
+    async login(username: string, password: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/token/generate-token',
+                {
+                    username, password, ipaddress: "127.0.0.1"
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error login', error);
             throw error;
         }
     }

@@ -8,7 +8,7 @@ import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import { FormBuilderAdapter } from "../../libs/FormBuilderAdaptor.ts";
 import JobListItem from '../JobListItem';
 
-const api = new AxiosAPI("http://192.168.100.23:8081");
+const api = new AxiosAPI();
 
 const breadcrumbItems = [
   { title: "Home" },
@@ -29,6 +29,8 @@ function getUrlParameter<T extends string | number>(name: string): T | null {
 
   return value as T;
 }
+  
+const documentId: any = getUrlParameter("id");
 
 const DocumentsView = (params: any) => {
   const {
@@ -46,7 +48,9 @@ const DocumentsView = (params: any) => {
   const [documentItems, setDocumentItems] = useState([]);
 
   useEffect(() => {
-    const documentId: any = getUrlParameter("id");
+
+    console.log("JOB LIST VIEW", localStorage.getItem("simplex-token"));
+    
     api
       .getAllDocumentJobs(documentId)
       .then((templates: any) => {
@@ -56,7 +60,8 @@ const DocumentsView = (params: any) => {
       .catch((error) => {
         console.error("Retrieval failed:", error);
       });
-  }, [api]);
+    
+  }, []);
 
   const captureAndSaveFormData = async (
     templateId: string,
@@ -188,6 +193,7 @@ const DocumentsView = (params: any) => {
                 api={api}
                 captureAndSaveFormData={captureAndSaveFormData}
                 docItem={docItem}
+                documentId={documentId}
                 setModal3Open={setModal3Open}
                 setModal4Open={setModal4Open}
                 setModal5Open={setModal5Open}

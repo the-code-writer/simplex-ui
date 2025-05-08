@@ -8,7 +8,7 @@ import { AxiosAPI } from "../../libs/AxiosAPI";
 import { FormBuilderAdapter } from "../../libs/FormBuilderAdaptor.ts";
 import DocumentListItem from '../DocumentListItem';
 
-const api = new AxiosAPI("http://192.168.100.23:8081");
+const api = new AxiosAPI();
 
 const breadcrumbItems = [
   { title: "Home" },

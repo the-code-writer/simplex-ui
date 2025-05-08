@@ -141,7 +141,7 @@ export interface SaveDocumentRequest {
 }
 
 // ==================== ADAPTER CLASS ====================
-
+       
 export class FormBuilderAdapter {
     /**
      * Converts React Form Builder JSON to Backend JSON format
@@ -152,10 +152,14 @@ export class FormBuilderAdapter {
     static toBackendFormat(
         reactData: ReactFormBuilderData,
         formMetadata: {
-            id: string;
+            id?: string;
             title: string;
-            datecreated: string;
-            createdby: {
+            description: string;
+            workflowid: string;
+            metadata: string;
+            version: string;
+            datecreated?: string;
+            createdby?: {
                 firstname: string;
                 id: string;
                 middlename: string | null;
@@ -166,8 +170,6 @@ export class FormBuilderAdapter {
     ): BackendForm {
         const backendForm: BackendForm = {
             ...formMetadata,
-            description: null,
-            version: null,
             listsections: [],
         };
 
