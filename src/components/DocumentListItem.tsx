@@ -69,15 +69,22 @@ const DocumentListItem: React.FC = (params: any) => {
   const [formData, setFormData] = useState<FormBuilderForm | any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
 
   useEffect(() => {
+
+    docItem.listdocumentsections = docItem.listsections;
+
     const reactForm = FormBuilderAdapter.toReactFormat(docItem);
 
-    console.log("DOCUMENT ITEM::", docItem);
-    console.log(
-      "React Form:001:",
-      JSON.stringify(reactForm.task_data, null, 2)
-    );
-    console.log("React Form:002:", reactForm.task_data);
-    setFormData(reactForm.task_data);
+    if (docItem.id === "55d99258-e0bd-4af8-8970-33ea8be6a9f7") {
+      console.log("DOCUMENT ITEM::", docItem);
+    }
+      //console.log("DOCUMENT ITEM::", docItem);
+
+      //console.log("React Form:001:",JSON.stringify(reactForm.task_data, null, 2));
+
+      //console.log("React Form:002:", reactForm.task_data);
+
+      setFormData(reactForm.task_data);
+
   }, [docItem]);
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {

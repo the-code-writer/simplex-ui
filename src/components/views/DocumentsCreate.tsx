@@ -75,14 +75,18 @@ const DocumentsCreate = (params: any) => {
   }
 
   useEffect(() => {
+
     const formDataLocal = localStorage.getItem("form_data");
 
     if (formDataLocal) {
+
       const formDataLocalObject = JSON.parse(formDataLocal);
 
       console.log(` ::: formDataLocalObject ::: `, formDataLocalObject);
 
       setFormData(formDataLocalObject);
+
+    }
 
       api
         .getWorkflows()
@@ -101,9 +105,12 @@ const DocumentsCreate = (params: any) => {
         })
         .catch((error: any) => {
           console.error("STAGE TASKS ERROR", error);
+          if (error.response.status === 401) {
+            localStorage.clear();
+            window.location.reload();
+          }
         });
       
-    }
   }, []);
 
   // Simulate loading saved form data (e.g., from an API or localStorage)

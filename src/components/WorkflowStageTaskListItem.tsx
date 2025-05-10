@@ -9,15 +9,18 @@ import {
   MenuProps,
   message,
   Modal,
+  Result,
   Row,
   Space,
   theme,
 } from "antd";
-import { FileOutlined, FlagOutlined, InboxOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { FileOutlined, EllipsisOutlined } from '@ant-design/icons';
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
+import { AxiosAPI, CreatedBy } from '../libs/AxiosAPI';
 
+const api = new AxiosAPI();
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -45,51 +48,30 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
   `,
 }));
 
-interface Task {
-  description: string | null;
-  id: string;
-  datecreated: string | null;
-  createdby: {
-    email: string | null;
-    firstname: string | null;
-    id: string;
-    middlename: string | null;
-    lastname: string | null;
-    enabled: boolean;
-  };
-  deleted: boolean;
-  task: string;
-  stage: string | null;
-  taskorder: number;
-}
-
 interface MenuItem {
   label: string;
   key: string;
   icon: React.ReactNode;
 }
 
-function convertTasksToMenuItems(tasks: Task[]): MenuItem[] {
-  return tasks.map((task) => ({
-    label: task.task, // Use the 'task' property as label
-    key: task.id, // Use the 'id' property as key
-    icon: <FileOutlined />, // Use FileOutlined icon for all items
-  }));
-}
-
-const WorkFlowListItem: any = (params: any) => {
+const WorkflowStageTaskListItem: any = (params: any) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const { listItem } = params;
+  const { listItem, listItemIndex } = params;
 
   const { styles } = useStyle();
 
-  const [listItemDetailsModalOpen, setListItemDetailsModalOpen] = useState(false);
+  const [listItemDetailsModalOpen, setListItemDetailsModalOpen] =
+    useState(false);
 
   const [listItemEditorModalOpen, setListItemEditorModalOpen] = useState(false);
 
-  useEffect(() => {}, [listItem]);
+  const [modalAjaxResultOpen, setModalAjaxResultOpen] = useState(false);
+
+  const [modalAjaxResultTitle, setModalAjaxResultTitle] = useState("");
+
+  const [modalAjaxResultSubTitle, setModalAjaxResultSubTitle] = useState("");
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     console.log("click ::: 1", e);
@@ -101,12 +83,12 @@ const WorkFlowListItem: any = (params: any) => {
       }
 
       case "2": {
-        window.location.href = `/workflow/stages?id=${listItem.id}&title=Workflow Stages&name=${listItem.title}`;
+        setListItemEditorModalOpen(true);
         break;
       }
 
-      case "3": {
-        setListItemEditorModalOpen(true);
+      case "5": {
+        window.location.href = `/workflow/stage/tasks?id=${listItem.id}`;
         break;
       }
 
@@ -116,27 +98,32 @@ const WorkFlowListItem: any = (params: any) => {
     }
   };
 
-const items: MenuProps["items"] = [
-  {
-    key: "1",
-    label: "View Workflow Details",
-  },
-  {
-    key: "2",
-    label: "View Workflow Stages",
-  },
-  {
-    key: "3",
-    label: "Edit Workflow",
-  },
-];
-  
-  
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: "View Task Details",
+    },
+    {
+      key: "2",
+      label: "Edit Task",
+    },
+    {
+      key: "3",
+      label: "Move Task Up",
+    },
+    {
+      key: "4",
+      label: "Move Task Down",
+    },
+  ];
+
   const [newItemTitle, setNewItemTitle] = useState(listItem.title);
 
-  const [newItemDescription, setNewItemDescription] = useState(listItem.description);
+  const [newItemDescription, setNewItemDescription] = useState(
+    listItem.description
+  );
 
-  const saveListItem = async () => {
+  const updateListItem = async () => {
     console.log("Save Request:", [newItemTitle, newItemDescription]);
 
     const docResponse = await api.saveWorkflow(
@@ -144,11 +131,10 @@ const items: MenuProps["items"] = [
       newItemDescription
     );
 
-    console.log("docResponse:", docResponse);
+    console.log("Save Request Response:", docResponse);
 
     window.location.reload();
   };
-
 
   return (
     <>
@@ -165,28 +151,15 @@ const items: MenuProps["items"] = [
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
           <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
             <div className="label-value-pair doc-descriptio10n">
-              <span className="label">Title:</span>
-              <span className="value multi-liner">{listItem.title}</span>
-            </div>
-            <div className="label-value-pair doc-description">
-              <span className="label">Description:</span>
-              <span className="value multi-liner">{listItem.description}</span>
+              <span className="label">Task Name:</span>
+              <span className="value multi-liner">{listItem.task}</span>
             </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={9} lg={9} xl={9}>
             <div className="label-value-pair doc-date-created">
-              <span className="label">Date Created:</span>
-              <span className="value single-liner">{listItem.datecreated}</span>
-            </div>
-            <div className="label-value-pair doc-date-updated">
-              <span className="label">Created By:</span>
-              <span className="value single-liner">
-                {listItem.createdby.firstname}
+              <span className="value two-line-ellipsis">
+                {listItem.description}
               </span>
-            </div>
-            <div className="label-value-pair doc-status">
-              <span className="label">Current Status:</span>
-              <span className="value single-liner">Draft</span>
             </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={1} lg={1} xl={1}>
@@ -246,7 +219,7 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Workflow Title:</span>
+                      <span className="input-label">Stage Task Title:</span>
                       <Input
                         size="large"
                         className="w-100"
@@ -266,7 +239,9 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Workflow Description:</span>
+                      <span className="input-label">
+                        Stage Task Description:
+                      </span>
                       <TextArea
                         size="large"
                         className="w-100"
@@ -286,7 +261,7 @@ const items: MenuProps["items"] = [
 
       <Modal
         centered
-        title="Workflow Details"
+        title="Stage Task Details"
         style={{ top: 20 }}
         open={listItemDetailsModalOpen}
         onOk={() => setListItemDetailsModalOpen(false)}
@@ -315,8 +290,8 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Workflow Title: </span>
-                      {listItem.title}
+                      <span className="input-label">Stage Task Title: </span>
+                      {listItem.task}
                     </div>
                   </Col>
 
@@ -330,7 +305,7 @@ const items: MenuProps["items"] = [
                   >
                     <div className="input-wrapper">
                       <span className="input-label">
-                        Workflow Description:{" "}
+                        Stage Task Description:{" "}
                       </span>
                       {listItem.description}
                     </div>
@@ -355,8 +330,28 @@ const items: MenuProps["items"] = [
           </div>
         </Space>
       </Modal>
+
+      <Modal centered open={modalAjaxResultOpen} footer={[<></>]}>
+        <Result
+          status="success"
+          title={modalAjaxResultTitle}
+          subTitle={modalAjaxResultSubTitle}
+          extra={[
+            <Button
+              type="primary"
+              key="console"
+              onClick={() => {
+                setModalAjaxResultOpen(false);
+                window.location.reload();
+              }}
+            >
+              Close
+            </Button>,
+          ]}
+        />
+      </Modal>
     </>
   );
 };
 
-export default WorkFlowListItem;
+export default WorkflowStageTaskListItem;

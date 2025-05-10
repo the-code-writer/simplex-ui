@@ -10,7 +10,7 @@ const api = new AxiosAPI();
 
 const breadcrumbItems = [
   { title: "Home" },
-  { title: "Documents" },
+  { title: "Workflows" }
 ];
 
 const WorkflowsView = (params: any) => {

@@ -270,7 +270,7 @@ export class FormBuilderAdapter {
         const reactData: ReactFormElement[] = [];
         let parentIndexCounter = 0;
 
-        backendData.listsections.forEach((section) => {
+        backendData.listdocumentsections.forEach((section) => {
             // Add header for section
             const header: ReactHeaderElement = {
                 id: this.generateId(),

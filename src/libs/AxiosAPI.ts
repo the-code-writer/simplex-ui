@@ -281,6 +281,23 @@ export class AxiosAPI {
      * Retrieves all document templates
      * @returns Promise containing an array of document templates
      */
+    async assignRoleToWorkflowStage(roleid: string, workflowstageid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.put(
+                `/api/v1/workflowstage/assignrole`,
+                { roleid, workflowstageid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assignRoleToWorkflowStage:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
     async revertJob(id: any): Promise<DocumentTemplateResponse[]> {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.put(
@@ -361,14 +378,14 @@ export class AxiosAPI {
      * Retrieves all document templates
      * @returns Promise containing an array of document templates
      */
-    async getUserRole(): Promise<DocumentTemplateResponse[]> {
+    async getUserRoles(): Promise<DocumentTemplateResponse[]> {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
                 `/api/v1/role/all`
             );
             return response.data;
         } catch (error) {
-            console.error('Error assignToWorkflow:', error);
+            console.error('Error getUserRole:', error);
             throw error;
         }
     }
@@ -398,6 +415,32 @@ export class AxiosAPI {
             return response.data;
         } catch (error) {
             console.error('Error saving workflow', error);
+            throw error;
+        }
+    }
+
+    async saveWorkflowStage(title: string, description: string, workflowid:string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/workflowstage',
+                { title, description, workflowid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving workflow stage', error);
+            throw error;
+        }
+    }
+
+    async saveWorkflowStageTask(name: string, submittonext: boolean, submittoprevious: boolean, workflowstageid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                '/api/v1/task',
+                { name, submittonext, submittoprevious, workflowstageid }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error saving workflow stage task', error);
             throw error;
         }
     }

@@ -1,19 +1,13 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input, Result, Select, message } from 'antd';
+import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input, Result, Checkbox, CheckboxProps } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import TextArea from "antd/es/input/TextArea";
-import WorkflowStageListItem from '../WorkflowStageListItem.tsx';
+import WorkflowStageTaskListItem from "../WorkflowStageTaskListItem.tsx";
 import NoData from "../NoData.tsx";
-import { UserOutlined } from "@ant-design/icons";
 
 const api = new AxiosAPI();
-
-import { notification } from "antd";
-import React from "react";
-
-const Context = React.createContext({ name: 'Default' }); 
 
 function getUrlParameter<T extends string | number>(name: string): T | null {
   const params = new URLSearchParams(window.location.search);
@@ -29,26 +23,27 @@ function getUrlParameter<T extends string | number>(name: string): T | null {
   return value as T;
 }
 
-const workflowId: any = getUrlParameter("id");
-
-const name: any = getUrlParameter("name");
+const stageId: any = getUrlParameter("id");
 
 const pageTitle: any = getUrlParameter("title");
+
+const name: any = getUrlParameter("name");
 
 const breadcrumbItems = [
   { title: "Home" },
   { title: "Workflows" },
+  { title: "Workflow Stages" },
+  { title: "Stage Tasks" },
   { title: name },
-  { title: "Stages" },
 ];
 
-const WorkflowStagesView = (params: any) => {
-
+const WorkflowStageTasksView = (params: any) => {
   const { colorBgContainer, borderRadiusLG, listItem } = params;
 
   const { Title } = Typography;
 
-  const [newWorkflowStageModalOpen, setNewWorkflowStageModalOpen] = useState(false);
+  const [newWorkflowStageModalOpen, setNewWorkflowStageModalOpen] =
+    useState(false);
 
   const [modalAjaxResultOpen, setModalAjaxResultOpen] = useState(false);
 
@@ -62,105 +57,43 @@ const WorkflowStagesView = (params: any) => {
   const [newItemDescription, setNewItemDescription] = useState("");
   const [roleid, setRoleid] = useState("");
 
-  const [optionsUserRoles, setOptionsUserRoles] = useState([]);
-
   useEffect(() => {
-
     api
-      .getWorkflowStages(workflowId)
+      .getWorkflowStageTasks(stageId)
       .then((listViewItemsList: any) => {
-        console.log(
-          "All Items: listViewItemsList : Workflow Stages",
-          workflowId,
-          [listViewItemsList]
-        );
+        console.log("All Items: listViewItemsList : Stage Tasks", stageId, [
+          listViewItemsList,
+        ]);
         const sortedListItems = listViewItemsList.sort(
-          (a:any, b:any) => a.stageorder - b.stageorder
+          (a: any, b: any) => a.stageorder - b.stageorder
         );
         setListViewItems(sortedListItems);
       })
       .catch((error) => {
         console.error("Retrieval failed:", error);
       });
-    
-    api
-      .getUserRoles()
-      .then((userRoles: any) => {
-        console.log("All Items: userRoles", userRoles);
-
-        // Transform API response to your desired format
-        const formattedRoles = userRoles.map((roleObj: any) => ({
-          label: roleObj.role,
-          value: roleObj.id,
-          emoji: <UserOutlined />, // or a placeholder if needed
-          desc: roleObj.role,
-        }));
-
-        // Append the Super Admin option
-        const updatedRoles = [
-          ...formattedRoles,
-          {
-            label: "Super Admin",
-            value: "admin",
-            emoji: <UserOutlined />,
-            desc: "Admin",
-          },
-        ];
-
-        setOptionsUserRoles(updatedRoles);
-
-      })
-      .catch((error) => {
-        console.error("Retrieval failed:", error);
-      });
-    
-  }, []);
-
-  const [apiNotification, contextHolder] = notification.useNotification();
-
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-
-  const handleChangeSelectedRoles = (value: string[]) => {
-    console.log(`selected ${value}`);
-    setSelectedRoles(value); // This updates the state
-  };
+  }, [api]);
 
   const saveListItem = async () => {
 
     console.log("Save Request:", [newItemTitle, newItemDescription, roleid]);
 
-    const docResponse = await api.saveWorkflowStage(
+    const docResponse = await api.saveWorkflowStageTask(
       newItemTitle,
-      newItemDescription,
-      workflowId
+      moveToNextChangeValue,
+      moveToPreviousChangeValue,
+      stageId
     );
 
-    console.log("docResponse:", docResponse, [optionsUserRoles]);
-
-    selectedRoles.map((role: any) => {
-      api
-        .assignRoleToWorkflowStage(role, docResponse.id)
-        .then((response: any) => {
-          if (response.message === "ASSIGNED") {
-            console.log({
-              //apiNotification.info
-              message: `Role Assigned`,
-              description: `Role '${role}' has been assigned to Stage: ${newItemTitle}`,
-              placement: "bottomRight",
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Saving role failed:", error);
-        });
-    });
+    console.log("docResponse:", docResponse);
 
     setNewWorkflowStageModalOpen(false);
     setModalAjaxResultOpen(true);
 
     setModalAjaxResultTitle(`Success!`);
-    setModalAjaxResultSubTitle(`Workflow Stage ${newItemTitle} saved successfully!`);
-
+    setModalAjaxResultSubTitle(
+      `Stage Task ${newItemTitle} saved successfully!`
+    );
   };
 
   const onTabChange = (key: string) => {
@@ -170,24 +103,39 @@ const WorkflowStagesView = (params: any) => {
   const tabItems: TabsProps["items"] = [
     {
       key: "1",
-      label: "Active Workflow Stages",
+      label: "Active Stage Tasks",
       children: "Content of Tab Pane 1",
     },
     {
       key: "1",
-      label: "Disabled Workflow Stages",
+      label: "Disabled Stage Tasks",
       children: "Content of Tab Pane 1",
     },
   ];
 
+  const [moveToPreviousChangeValue, setMoveToPreviousChangeValue] = useState(false);
 
-const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
+  const onMoveToPreviousChange: CheckboxProps["onChange"] = (e: any) => {
+    console.log(`onMoveToPreviousChange checked = ${e.target.checked}`);
+    setMoveToPreviousChangeValue(e.target.checked);
+    if (e.target.checked) {
+      setMoveToNextChangeValue(false);
+    }
+  };
 
+  const [moveToNextChangeValue, setMoveToNextChangeValue] =
+    useState(false);
+
+  const onMoveToNextChange: CheckboxProps["onChange"] = (e: any) => {
+    console.log(`onMoveToNextChange checked = ${e.target.checked}`);
+    setMoveToNextChangeValue(e.target.checked);
+    if (e.target.checked) {
+      setMoveToPreviousChangeValue(false);
+    }
+  };
 
   return (
     <>
-      <Context.Provider value={contextValue}>
-      {contextHolder}
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
         <Title level={1}>{pageTitle + ": " + name}</Title>
 
@@ -218,7 +166,7 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
                   type="primary"
                   onClick={() => setNewWorkflowStageModalOpen(true)}
                 >
-                  New Workflow Stage
+                  New Stage Task
                 </Button>
               </Flex>
             </div>
@@ -241,7 +189,7 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
                   lg={24}
                   xl={24}
                 >
-                  <WorkflowStageListItem
+                  <WorkflowStageTaskListItem
                     listItemIndex={listItemIndex}
                     listItem={listViewItem}
                   />
@@ -251,17 +199,16 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
           ) : (
             <NoData
               onButtonClick={() => setNewWorkflowStageModalOpen(true)}
-              buttonLabel={"New Workflow Stage"}
+              buttonLabel={"New Stage Task"}
               description="No workflow stages configured yet"
             />
           )}
         </Row>
       </Content>
-      </Context.Provider>
 
       <Modal
         centered
-        title="Create A New Workflow Stage"
+        title="Create A New Stage Task"
         style={{ top: 20 }}
         width={750}
         open={newWorkflowStageModalOpen}
@@ -291,7 +238,7 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Stage Title:</span>
+                      <span className="input-label">Task Name:</span>
                       <Input
                         size="large"
                         className="w-100"
@@ -301,65 +248,71 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
                       />
                     </div>
                   </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
+                  ><hr />
+                  </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={12}
+                    lg={12}
+                    xl={12}
+                  >
+                    <Checkbox
+                      checked={moveToPreviousChangeValue}
+                      onChange={onMoveToPreviousChange}
+                    >
+                      Move document to <strong>previous</strong> stage
+                    </Checkbox>
+                  </Col>
 
                   <Col
                     className="gutter-row mb-16px"
                     xs={24}
                     sm={24}
-                    md={24}
-                    lg={24}
-                    xl={24}
+                    md={12}
+                    lg={12}
+                    xl={12}
                   >
-                    <div className="input-wrapper">
-                      <span className="input-label">Stage Description:</span>
-                      <TextArea
-                        size="large"
-                        className="w-100"
-                        placeholder="Enter your workflow description here"
-                        value={newItemDescription}
-                        onChange={(e) => setNewItemDescription(e.target.value)}
-                        autoSize={{ minRows: 2, maxRows: 6 }}
-                      />
-                    </div>
+                    <Checkbox
+                      checked={moveToNextChangeValue}
+                      onChange={onMoveToNextChange}
+                    >
+                      Move document to <strong>next</strong> stage
+                    </Checkbox>
                   </Col>
-                  <Col
-                    className="gutter-row mb-16px"
-                    xs={24}
-                    sm={24}
-                    md={24}
-                    lg={24}
-                    xl={24}
-                  >
-                    <hr />
-                  </Col>
-                  <Col
-                    className="gutter-row mb-16px"
-                    xs={24}
-                    sm={24}
-                    md={24}
-                    lg={24}
-                    xl={24}
-                  >
-                    <div className="input-wrapper">
-                      <span className="input-label">Stage User Roles:</span>
-                      <Select
-                        mode="multiple"
-                        style={{ width: "100%" }}
-                        placeholder="select one or more user roles"
-                        defaultValue={[]}
-                        onChange={handleChangeSelectedRoles}
-                        options={optionsUserRoles}
-                        optionRender={(option) => (
-                          <Space>
-                            <span role="img" aria-label={option.data.label}>
-                              {option.data.emoji}
-                            </span>
-                            {option.data.desc}
-                          </Space>
-                        )}
-                      />
-                    </div>
-                  </Col>
+
+                  {false && (
+                    <Col
+                      className="gutter-row mb-16px"
+                      xs={24}
+                      sm={24}
+                      md={24}
+                      lg={24}
+                      xl={24}
+                    >
+                      <div className="input-wrapper">
+                        <span className="input-label">Task Description:</span>
+                        <TextArea
+                          size="large"
+                          className="w-100"
+                          placeholder="Enter your workflow description here"
+                          value={newItemDescription}
+                          onChange={(e) =>
+                            setNewItemDescription(e.target.value)
+                          }
+                          autoSize={{ minRows: 2, maxRows: 6 }}
+                        />
+                      </div>
+                    </Col>
+                  )}
                 </Row>
               </Space>
             </div>
@@ -390,4 +343,4 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
   );
 };
 
-export default WorkflowStagesView;
+export default WorkflowStageTasksView;
