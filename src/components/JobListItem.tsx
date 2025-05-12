@@ -91,14 +91,13 @@ const JobListItem: React.FC = (params: any) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  
+
   const { api, captureAndSaveFormData, docItem, documentId } = params;
 
   const { styles } = useStyle();
   const [modalUpdateTaskOpen, setModalUpdateTaskOpen] = useState(false);
   const [modal1Open, setModal1Open] = useState(false);
   const [formData, setFormData] = useState<FormBuilderForm | any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
-
 
   const [modalAjaxResultOpen, setModalAjaxResultOpen] = useState(false);
 
@@ -142,7 +141,7 @@ const JobListItem: React.FC = (params: any) => {
       case "job_update_task": {
         setModalUpdateTaskOpen(true);
         break;
-        }
+      }
 
       case "job_advance": {
         api
@@ -249,9 +248,7 @@ const JobListItem: React.FC = (params: any) => {
 
   const [taskMessage, setTaskMessage] = useState<string>("");
 
-
   const handleTaskMenuClick: MenuProps["onClick"] = (e) => {
-
     console.log("handleTaskMenuClick", e);
     setTaskText(e.domEvent.target.innerText);
     setTaskId(e.key);
@@ -263,9 +260,7 @@ const JobListItem: React.FC = (params: any) => {
       .then((res: any) => {
         console.log("JOB ADD TASK", docItem.id, res);
         setModalAjaxResultTitle("Job task has been updated successfully");
-        setModalAjaxResultSubTitle(
-          `Task : ${taskText}`
-        );
+        setModalAjaxResultSubTitle(`Task : ${taskText}`);
         setModalUpdateTaskOpen(false);
         setModalAjaxResultOpen(true);
       })
@@ -295,12 +290,11 @@ const JobListItem: React.FC = (params: any) => {
       items: stageTasksList,
       onClick: handleTaskMenuClick,
     });
-    
+
     setMenuProps({
       items,
       onClick: handleMenuClick,
     });
-    
   }, [stageTasksList]);
 
   useEffect(() => {
@@ -454,13 +448,8 @@ const JobListItem: React.FC = (params: any) => {
                   >
                     <div className="input-wrapper">
                       <span className="input-label">Task For Stage:</span>
-                      <Dropdown
-                        menu={taskMenuProps}
-                      >
-                        <Button
-                          size="large"
-                          className="w-100" 
-                        >
+                      <Dropdown menu={taskMenuProps}>
+                        <Button size="large" className="w-100">
                           {taskText}
                         </Button>
                       </Dropdown>
@@ -538,11 +527,11 @@ const JobListItem: React.FC = (params: any) => {
           <Flex vertical align="flex-end" style={{ width: "100%" }}>
             <img className="brand-logo" src={ltzLogo} width={150} />
             <span className="brand-address text-right">
-              Block B, Stand 45 and 47, Sam Levy Office Office Park
+              Sanctuary House, 04 Fairman Close
               <br />
-              Piers Rd, Borrowdale, Harare, Zimbabwe
+              Mt Pleasant, Harare, Zimbabwe
               <br />
-              Tel:+263-8677033000
+              +263 712 400 500, Email: info@sanctuary.co.zw
             </span>
           </Flex>
         </Flex>

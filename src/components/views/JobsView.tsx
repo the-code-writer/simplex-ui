@@ -5,7 +5,7 @@ import { Typography } from "antd";
 import DashboardCard from "../DashboardCard.tsx";
 import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
-import { FormBuilderAdapter } from "../../libs/FormBuilderAdaptor.ts";
+import { FormBuilderAdaptor } from "../../libs/FormBuilderAdaptor.ts";
 import JobListItem from '../JobListItem';
 
 const api = new AxiosAPI();
@@ -72,7 +72,7 @@ const DocumentsView = (params: any) => {
     const description = "This is the description of the document";
     const workflowId = "cb2d2397-67fc-4100-a7d5-ff6329327cd1";
 
-    const saveRequest = FormBuilderAdapter.prepareSaveRequest(
+    const saveRequest = FormBuilderAdaptor.prepareSaveRequest(
       formTitle,
       description,
       templateId,

@@ -10,10 +10,7 @@ import {
   Row,
   theme,
 } from "antd";
-import {
-  FileOutlined,
-  FlagOutlined,
-} from "@ant-design/icons";
+import { FileOutlined, FlagOutlined } from "@ant-design/icons";
 
 import { createStyles } from "antd-style";
 
@@ -23,7 +20,9 @@ import ltzLogo from "../assets/ltz.png";
 
 //import ActivityTimeLine from "./ActivityTimeline";
 import { ReactFormGenerator } from "react-form-builder2";
-import { FieldValue, FormBuilderAdapter } from "../libs/FormBuilderAdaptor";
+import { FormBuilderAdapter } from "../libs/FormBuilderAdapter";
+
+const formBuilderAdapter = new FormBuilderAdapter();
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -69,23 +68,24 @@ const DocumentListItem: React.FC = (params: any) => {
   const [formData, setFormData] = useState<FormBuilderForm | any>([]); //formDataFromLSParsed ||  FormBuilderForm[]
 
   useEffect(() => {
+    //
 
-    docItem.listdocumentsections = docItem.listsections;
-
-    const reactForm = FormBuilderAdapter.toReactFormat(docItem);
-
-    if (docItem.id === "55d99258-e0bd-4af8-8970-33ea8be6a9f7") {
-      console.log("DOCUMENT ITEM::", docItem);
-    }
-      //console.log("DOCUMENT ITEM::", docItem);
-
-      //console.log("React Form:001:",JSON.stringify(reactForm.task_data, null, 2));
-
-      //console.log("React Form:002:", reactForm.task_data);
-
-      setFormData(reactForm.task_data);
-
+    renderForm();
   }, [docItem]);
+
+  const renderForm = () => {
+    if ("listsections" in docItem) {
+      if (docItem.id === "11a50bd2-b2af-425b-bda2-3354b7882587") {
+        docItem.listdocumentsections = docItem.listsections;
+        console.log("DOC ITEM::", docItem);
+        const reactForm = formBuilderAdapter.parseFormData(docItem);
+        console.log("REACT FORM::", reactForm);
+        setFormData(reactForm);
+      } else {
+        console.log("NO REACT FORM::", docItem);
+      }
+    }
+  };
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     message.info("Click on left button.");
@@ -98,6 +98,7 @@ const DocumentListItem: React.FC = (params: any) => {
     switch (e.key) {
       case "doc_temp_details": {
         setModal1Open(true);
+        console.warn("DOCUMENT ITEM", docItem);
         break;
       }
 
@@ -273,11 +274,11 @@ const DocumentListItem: React.FC = (params: any) => {
           <Flex vertical align="flex-end" style={{ width: "100%" }}>
             <img className="brand-logo" src={ltzLogo} width={150} />
             <span className="brand-address text-right">
-              Block B, Stand 45 and 47, Sam Levy Office Office Park
+              Sanctuary House, 04 Fairman Close
               <br />
-              Piers Rd, Borrowdale, Harare, Zimbabwe
+              Mt Pleasant, Harare, Zimbabwe
               <br />
-              Tel:+263-8677033000
+              +263 712 400 500, Email: info@sanctuary.co.zw
             </span>
           </Flex>
         </Flex>

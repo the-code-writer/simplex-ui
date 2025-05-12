@@ -300,11 +300,11 @@ const ListViewDocumentCard: React.FC = (params: any) => {
           <Flex vertical align="flex-end" style={{ width: "100%" }}>
             <img className="brand-logo" src={ltzLogo} width={150} />
             <span className="brand-address text-right">
-              Block B, Stand 45 and 47, Sam Levy Office Office Park
+              Sanctuary House, 04 Fairman Close
               <br />
-              Piers Rd, Borrowdale, Harare, Zimbabwe
+              Mt Pleasant, Harare, Zimbabwe
               <br />
-              Tel:+263-8677033000
+              +263 712 400 500, Email: info@sanctuary.co.zw
             </span>
           </Flex>
         </Flex>
@@ -840,7 +840,6 @@ const ListViewDocumentCard: React.FC = (params: any) => {
           <ActivityTimeLine />
         </Flex>
       </Modal>
-
     </>
   );
 };

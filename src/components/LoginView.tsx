@@ -56,7 +56,7 @@ const LoginView = ({ onLogin }) => {
     >
       <ProConfigProvider dark>
         <LoginFormPage
-          backgroundImageUrl="https://img.freepik.com/free-vector/white-abstract-background_23-2148806276.jpg?semt=ais_hybrid&w=1920"
+          backgroundImageUrl="/bg.png"
           logo="/logo-white.png"
           backgroundVideoUrl="https://gw.alipayobjects.com/v/huamei_gcee1x/afts/video/jXRBRK_VAwoAAAAAAAAAAAAAK4eUAQBr"
           title=""

@@ -768,3 +768,12 @@ h1.ant-typography,
   color: #4f4f4f;
   margin-top: 8px;
 }
+
+.react-form-builder-form .rfb-item .row {
+  border: 1px solid #eee !important;
+  background-color: #f5f5f5 !important;
+}
+
+.react-form-builder-form .rfb-item label span {
+  background: transparent !important;
+}

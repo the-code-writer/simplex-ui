@@ -1,12 +1,31 @@
-import { ReactFormBuilder, ReactFormGenerator } from "react-form-builder2";
+import {
+  ReactFormBuilder,
+  ReactFormGenerator,
+  ElementStore,
+  Registry,
+} from "react-form-builder2";
 import "react-form-builder2/dist/app.css";
-import { Breadcrumb, Button, Col, Dropdown, Flex, Modal, Row, Typography } from "antd";
+import {
+  Breadcrumb,
+  Button,
+  Col,
+  Dropdown,
+  Flex,
+  Modal,
+  Row,
+  Typography,
+} from "antd";
 import { Content } from "antd/es/layout/layout";
-import { useEffect, useState } from "react";
-import { BackendForm, FormBuilderAdapter } from "../../libs/FormBuilderAdaptor";
+import { forwardRef, useEffect, useState } from "react";
+import { BackendForm, FormBuilderAdaptor } from "../../libs/FormBuilderAdaptor";
+import { FormBuilderAdapter } from "../../libs/FormBuilderAdapter";
 import TextArea from "antd/es/input/TextArea";
 import { AxiosAPI } from "../../libs/AxiosAPI";
 import { FileOutlined } from "@ant-design/icons";
+
+import qrCode from "../../assets/qrcode.png";
+
+import ltzLogo from "../../assets/ltz.png";
 
 const api = new AxiosAPI();
 const DocumentsCreate = (params: any) => {
@@ -16,7 +35,9 @@ const DocumentsCreate = (params: any) => {
 
   const [formData, setFormData] = useState<any>([]);
   const [preview, setPreview] = useState(false);
-  const [formWorkflowText, setFormWorkflowText] = useState("Select Document Workflow");
+  const [formWorkflowText, setFormWorkflowText] = useState(
+    "Select Document Workflow"
+  );
   const [formWorkflowId, setFormWorkflowId] = useState("");
   const [formMetadata, setFormMetadata] = useState("");
   const [formName, setFormName] = useState("");
@@ -32,6 +53,17 @@ const DocumentsCreate = (params: any) => {
   const onPost = (data: any) => {
     // This would typically be an API call to save your form
     localStorage.setItem("form_data", JSON.stringify(data.task_data));
+    localStorage.setItem(
+      "form_details",
+      JSON.stringify({
+        title: formName,
+        description: formDescription,
+        metadata: formMetadata,
+        workflowid: formWorkflowId,
+        version: formVersion,
+        listdocumentsections: data.task_data,
+      })
+    );
     console.log("Form data:", data);
     setFormData(data.task_data);
   };
@@ -41,22 +73,29 @@ const DocumentsCreate = (params: any) => {
   };
 
   const saveForm = () => {
+    const documentTemplateData: any = {
+      title: formName,
+      description: formDescription,
+      metadata: formMetadata,
+      workflowid: formWorkflowId,
+      version: formVersion,
+      listdocumentsections: [],
+    };
     // Here you would typically save the form data to your backend
     console.log("Saving form:::::", { formName, formData });
-    
-    const fm:BackendForm = FormBuilderAdapter.toBackendFormat(
-      { task_data: formData },
-      {
-        title: formName,
-        description: formDescription,
-        metadata: formMetadata,
-        workflowid: formWorkflowId,
-        version: formVersion
-      }
-    );
-    console.log(`Form :  "${formName}" saved!`, fm);
+
+    const formBuilderAdapter = new FormBuilderAdapter();
+
+    const result = formBuilderAdapter.convert(formData);
+
+    console.log("Parsed Result:::::", result);
+
+    documentTemplateData.listdocumentsections = result.listdocumentsections;
+
+    console.log("Saving Result:::::", documentTemplateData);
+
     api
-      .createDocumentTemplate(fm)
+      .createDocumentTemplate(documentTemplateData)
       .then((res: any) => {
         console.log("DOCUMENT TEMPLATE SAVED", res.data);
         console.log(`Form 1 "${formName}" saved!`);
@@ -64,6 +103,19 @@ const DocumentsCreate = (params: any) => {
       .catch((error: any) => {
         console.error("STAGE TASKS ERROR", error);
       });
+    return;
+
+    const fm: BackendForm = FormBuilderAdapter.toBackendFormat(
+      { task_data: formData },
+      {
+        title: formName,
+        description: formDescription,
+        metadata: formMetadata,
+        workflowid: formWorkflowId,
+        version: formVersion,
+      }
+    );
+    console.log(`Form :  "${formName}" saved!`, fm);
   };
 
   function convertTasksToMenuItems(tasks: Task[]): MenuItem[] {
@@ -75,42 +127,36 @@ const DocumentsCreate = (params: any) => {
   }
 
   useEffect(() => {
+    const formDetailsLocal = localStorage.getItem("form_details");
 
-    const formDataLocal = localStorage.getItem("form_data");
-
-    if (formDataLocal) {
-
-      const formDataLocalObject = JSON.parse(formDataLocal);
+    if (formDetailsLocal) {
+      const formDataLocalObject = JSON.parse(formDetailsLocal);
 
       console.log(` ::: formDataLocalObject ::: `, formDataLocalObject);
 
-      setFormData(formDataLocalObject);
-
+      setFormData(formDataLocalObject.listdocumentsections);
     }
 
-      api
-        .getWorkflows()
-        .then((res: any) => {
-          console.log("WORKFLOWS", res);
-          const sortedTasks = [...res].sort(
-            (a, b) => a.taskorder - b.taskorder
-          );
-          console.log("SORTED WORKFLOWS", sortedTasks);
-          const convertedTasks = convertTasksToMenuItems(sortedTasks);
-          console.log("CONVERTED WORKFLOWS", convertedTasks);
-          setWorkflowMenuProps({
-            items: convertedTasks,
-            onClick: handleWorkflowMenuClick,
-          });
-        })
-        .catch((error: any) => {
-          console.error("STAGE TASKS ERROR", error);
-          if (error.response.status === 401) {
-            localStorage.clear();
-            window.location.reload();
-          }
+    api
+      .getWorkflows()
+      .then((res: any) => {
+        console.log("WORKFLOWS", res);
+        const sortedTasks = [...res].sort((a, b) => a.taskorder - b.taskorder);
+        console.log("SORTED WORKFLOWS", sortedTasks);
+        const convertedTasks = convertTasksToMenuItems(sortedTasks);
+        console.log("CONVERTED WORKFLOWS", convertedTasks);
+        setWorkflowMenuProps({
+          items: convertedTasks,
+          onClick: handleWorkflowMenuClick,
         });
-      
+      })
+      .catch((error: any) => {
+        console.error("STAGE TASKS ERROR", error);
+        if (error.response.status === 401) {
+          localStorage.clear();
+          window.location.reload();
+        }
+      });
   }, []);
 
   // Simulate loading saved form data (e.g., from an API or localStorage)
@@ -125,12 +171,29 @@ const DocumentsCreate = (params: any) => {
     setFormWorkflowId(e.key);
   };
 
-
   const [workflowMenuProps, setWorkflowMenuProps] = useState<any>({
     items: [],
     onClick: handleWorkflowMenuClick,
   });
 
+  useEffect(() => {
+    const TestComponent = () => <h2>Hello</h2>;
+    //Custom Component with input element
+    const MyInput = forwardRef((props: any, ref: any) => {
+      const { name, defaultValue, disabled } = props;
+      return (
+        <input
+          ref={ref}
+          name={name}
+          defaultValue={defaultValue}
+          disabled={disabled}
+        />
+      );
+    });
+    //Register custom components to be used in form builder
+    Registry.register("MyInput" + Date.now(), MyInput);
+    Registry.register("TestComponent" + Date.now(), TestComponent); //
+  }, []);
 
   return (
     <>
@@ -314,6 +377,35 @@ const DocumentsCreate = (params: any) => {
             borderRadius: borderRadiusLG,
           }}
         >
+          <Flex align="flex-start" justify="space-between">
+            <div style={{ width: "50%" }}>
+              <img src={qrCode} width={96} />
+              <h2
+                style={{
+                  width: "100%",
+                  fontWeight: 800,
+                  fontSize: 28,
+                  marginTop: 24,
+                  color: "#777777",
+                }}
+              >
+                {formName}
+              </h2>
+            </div>
+            <Flex vertical align="flex-end" style={{ width: "50%" }}>
+              <img className="brand-logo" src={ltzLogo} width={150} />
+              <span className="brand-address text-right">
+                Sanctuary House, 04 Fairman Close
+                <br />
+                Mt Pleasant, Harare, Zimbabwe
+                <br />
+                +263 712 400 500, Email: info@sanctuary.co.zw
+              </span>
+            </Flex>
+          </Flex>
+
+          <hr />
+
           <ReactFormGenerator
             form_action="/path/to/submit"
             form_method="POST"

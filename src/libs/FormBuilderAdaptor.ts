@@ -1,23 +1,7 @@
-/**
- * Form Builder Adapter
- * 
- * This adapter converts between two JSON formats:
- * 1. React-Form-Builder2 format (flat structure with parentId references)
- * 2. Backend format (nested hierarchical structure)
- * 
- * Key differences handled by this adapter:
- * - React builder uses flat array with parentId references
- * - Backend uses nested objects without parentId
- * - React builder uses Header elements with pageBreak to mark sections
- * - Backend has explicit section objects
- * - React builder has row containers (TwoColumnRow, ThreeColumnRow)
- * - Backend has columnCount property on sections
- */
-
 // ==================== INTERFACES ====================
 
 /**
- * Base export interface for all form elements
+ * Base interface for all form elements
  */
 export interface BaseFormElement {
     id: string;
@@ -46,18 +30,21 @@ export interface ReactHeaderElement extends ReactFormBuilderBaseElement {
     italic: boolean;
     content: string;
     pageBreakBefore: boolean;
-    alternateForm?: any;
+    alternateForm?: boolean;
 }
 
 export interface ReactRowElement extends ReactFormBuilderBaseElement {
-    element: 'TwoColumnRow' | 'ThreeColumnRow';
+    element: 'TwoColumnRow' | 'ThreeColumnRow' | 'MultiColumnRow';
     field_name: string;
     childItems: (string | null)[];
     isContainer: true;
+    col_count?: number; // For MultiColumnRow
 }
 
 export interface ReactInputElement extends ReactFormBuilderBaseElement {
-    element: 'TextInput' | 'NumberInput' | 'TextArea' | 'Dropdown';
+    element: 'TextInput' | 'NumberInput' | 'TextArea' | 'Dropdown' |
+    'RadioButtons' | 'Checkboxes' | 'DatePicker' | 'PhoneNumber' |
+    'EmailInput';
     canHaveAnswer: boolean;
     field_name: string;
     label: string;
@@ -69,6 +56,12 @@ export interface ReactInputElement extends ReactFormBuilderBaseElement {
         text: string;
         key: string;
     }>;
+    // DatePicker specific
+    dateFormat?: string;
+    timeFormat?: string;
+    showTimeSelect?: boolean;
+    // Checkboxes specific
+    inline?: boolean;
 }
 
 export type ReactFormElement = ReactHeaderElement | ReactRowElement | ReactInputElement;
@@ -85,9 +78,12 @@ export interface BackendOption {
     option: string;
 }
 
+export type BackendFieldType = 'TEXT' | 'NUMBER' | 'SELECT_LIST' | 'TEXT_AREA' |
+    'RADIO' | 'CHECKBOX' | 'DATE' | 'PHONE' | 'EMAIL';
+
 export interface BackendField extends BaseFormElement {
     fieldtitle: string;
-    fieldtype: 'TEXT' | 'NUMBER' | 'SELECT_LIST' | 'TEXT_AREA';
+    fieldtype: BackendFieldType;
     required: boolean;
     listoptions: BackendOption[];
     fieldorder: number;
@@ -98,7 +94,7 @@ export interface BackendSection {
     sectionorder: number;
     sectiontitle: string;
     showsectiontitle: boolean;
-    columncount: 'ONE_COLUMN' | 'TWO_COLUMN' | 'THREE_COLUMN';
+    columncount: 'ONE_COLUMN' | 'TWO_COLUMN' | 'THREE_COLUMN' | 'MULTI_COLUMN';
     listfields: BackendField[];
     listsubsection: BackendSection[];
 }
@@ -116,9 +112,8 @@ export interface BackendForm {
         enabled: boolean;
     };
     version: string | null;
-    listsections: BackendSection[];
+    listdocumentsections: BackendSection[];
 }
-
 
 // SAVE DATA
 
@@ -141,8 +136,8 @@ export interface SaveDocumentRequest {
 }
 
 // ==================== ADAPTER CLASS ====================
-       
-export class FormBuilderAdapter {
+
+export class FormBuilderAdaptor {
     /**
      * Converts React Form Builder JSON to Backend JSON format
      * @param reactData The React Form Builder data to convert
@@ -170,23 +165,18 @@ export class FormBuilderAdapter {
     ): BackendForm {
         const backendForm: BackendForm = {
             ...formMetadata,
-            listsections: [],
+            listdocumentsections: [],
         };
 
         let currentSection: BackendSection | null = null;
         let currentSubsection: BackendSection | null = null;
         let sectionOrder = 1;
 
-        // First pass: Process headers to create sections
+        // First pass: Create all sections based on headers
+        const sections: BackendSection[] = [];
         reactData.task_data.forEach((item) => {
-            if (item.element === 'Header' && item.pageBreakBefore) {
-                // Finalize previous section if exists
-                if (currentSection) {
-                    backendForm.listsections.push(currentSection);
-                }
-
-                // Create new section
-                currentSection = {
+            if (item.element === 'Header') {
+                const newSection: BackendSection = {
                     id: item.id || this.generateId(),
                     sectionorder: sectionOrder++,
                     sectiontitle: item.content,
@@ -195,69 +185,69 @@ export class FormBuilderAdapter {
                     listfields: [],
                     listsubsection: [],
                 };
-
-                currentSubsection = null; // Reset current subsection
+                sections.push(newSection);
             }
         });
 
-        // Add the last section if it exists
-        if (currentSection) {
-            backendForm.listsections.push(currentSection);
-        }
-
-        // Second pass: Process rows and fields
-        currentSection = null;
-        let currentRow: ReactRowElement | null = null;
-
+        // Second pass: Process all non-header elements
         reactData.task_data.forEach((item) => {
-            if (item.element === 'Header' && item.pageBreakBefore) {
-                // Find the corresponding section in backend form
-                currentSection = backendForm.listsections.find(
-                    (sec) => sec.sectiontitle === item.content
-                ) || null;
-                currentRow = null;
-            } else if (
-                (item.element === 'TwoColumnRow' || item.element === 'ThreeColumnRow') &&
-                currentSection
-            ) {
-                // Create a new subsection for the row
-                const columnCount =
-                    item.element === 'TwoColumnRow' ? 'TWO_COLUMN' : 'THREE_COLUMN';
+            if (item.element === 'Header') {
+                // Find the current section
+                currentSection = sections.find(sec => sec.id === item.id) || null;
+                currentSubsection = null;
+            } else if (currentSection) {
+                if (item.element === 'TwoColumnRow' ||
+                    item.element === 'ThreeColumnRow' ||
+                    item.element === 'MultiColumnRow') {
 
-                const newSubsection: BackendSection = {
-                    id: this.generateId(),
-                    sectionorder: (currentSection.listsubsection.length || 0) + 1,
-                    sectiontitle: 'string', // Placeholder as per backend example
-                    showsectiontitle: false,
-                    columncount: columnCount,
-                    listfields: [],
-                    listsubsection: [],
-                };
+                    // Create new subsection for the row
+                    const columnCount =
+                        item.element === 'TwoColumnRow' ? 'TWO_COLUMN' :
+                            item.element === 'ThreeColumnRow' ? 'THREE_COLUMN' : 'MULTI_COLUMN';
 
-                currentSection.listsubsection.push(newSubsection);
-                currentSubsection = newSubsection;
-                currentRow = item;
-            } else if (
-                currentSubsection &&
-                this.isInputElement(item) &&
-                currentRow &&
-                currentRow.childItems.includes(item.id)
-            ) {
-                // Add field to current subsection
-                const fieldType:any = this.mapFieldType(item.element);
-                const field: BackendField = {
-                    id: this.generateId(),
-                    fieldtitle: item.label,
-                    fieldtype: fieldType,
-                    required: item.required || false,
-                    listoptions: item.element === 'Dropdown' ? this.mapOptions(item.options || []) : [],
-                    fieldorder: currentSubsection.listfields.length + 1,
-                };
+                    currentSubsection = {
+                        id: item.id || this.generateId(),
+                        sectionorder: (currentSection.listsubsection.length || 0) + 1,
+                        sectiontitle: 'row', // Placeholder
+                        showsectiontitle: false,
+                        columncount: columnCount,
+                        listfields: [],
+                        listsubsection: [],
+                    };
 
-                currentSubsection.listfields.push(field);
+                    currentSection.listsubsection.push(currentSubsection);
+                } else if (currentSubsection && this.isInputElement(item)) {
+                    // Check if this item belongs to the current subsection
+                    const parentRow = reactData.task_data.find(
+                        el => el.element.includes('ColumnRow') &&
+                            (el as ReactRowElement).childItems.includes(item.id)
+                    ) as ReactRowElement | undefined;
+
+                    if (parentRow && currentSection.listsubsection.some(
+                        sub => sub.id === parentRow.id)) {
+
+                        // Add field to current subsection
+                        const fieldType = this.mapFieldType(item.element);
+                        const field: BackendField = {
+                            id: item.id || this.generateId(),
+                            fieldtitle: item.label || item.text,
+                            fieldtype: fieldType,
+                            required: item.required || false,
+                            listoptions: (item.element === 'Dropdown' ||
+                                item.element === 'RadioButtons' ||
+                                item.element === 'Checkboxes')
+                                ? this.mapOptions(item.options || [])
+                                : [],
+                            fieldorder: currentSubsection.listfields.length + 1,
+                        };
+
+                        currentSubsection.listfields.push(field);
+                    }
+                }
             }
         });
 
+        backendForm.listdocumentsections = sections;
         return backendForm;
     }
 
@@ -298,7 +288,9 @@ export class FormBuilderAdapter {
             // Process subsections (rows)
             section.listsubsection.forEach((subsection) => {
                 const rowType =
-                    subsection.columncount === 'TWO_COLUMN' ? 'TwoColumnRow' : 'ThreeColumnRow';
+                    subsection.columncount === 'TWO_COLUMN' ? 'TwoColumnRow' :
+                        subsection.columncount === 'THREE_COLUMN' ? 'ThreeColumnRow' : 'MultiColumnRow';
+
                 const rowId = this.generateId();
                 const childItems: string[] = [];
 
@@ -306,7 +298,8 @@ export class FormBuilderAdapter {
                 const row: ReactRowElement = {
                     id: rowId,
                     element: rowType,
-                    text: `${rowType === 'TwoColumnRow' ? 'Two' : 'Three'} Columns Row`,
+                    text: `${rowType === 'TwoColumnRow' ? 'Two' :
+                        rowType === 'ThreeColumnRow' ? 'Three' : 'Multi'} Columns Row`,
                     required: false,
                     canHavePageBreakBefore: true,
                     canHaveAlternateForm: true,
@@ -317,13 +310,14 @@ export class FormBuilderAdapter {
                     field_name: `${rowType.toLowerCase()}_${rowId}`,
                     childItems,
                     isContainer: true,
+                    ...(rowType === 'MultiColumnRow' && { col_count: 5 }) // Default for multi-column
                 };
 
                 reactData.push(row);
                 parentIndexCounter++;
 
                 // Process fields in subsection
-                subsection.listfields.forEach((field:any, index) => {
+                subsection.listfields.forEach((field, index) => {
                     const fieldId = field.id || this.generateId();
                     childItems.push(fieldId);
 
@@ -354,12 +348,17 @@ export class FormBuilderAdapter {
             'NumberInput',
             'TextArea',
             'Dropdown',
+            'RadioButtons',
+            'Checkboxes',
+            'DatePicker',
+            'PhoneNumber',
+            'EmailInput'
         ].includes(item.element);
     }
 
     private static mapFieldType(
         elementType: string
-    ): 'TEXT' | 'NUMBER' | 'SELECT_LIST' | 'TEXT_AREA' {
+    ): BackendFieldType {
         switch (elementType) {
             case 'TextInput':
                 return 'TEXT';
@@ -369,6 +368,16 @@ export class FormBuilderAdapter {
                 return 'SELECT_LIST';
             case 'TextArea':
                 return 'TEXT_AREA';
+            case 'RadioButtons':
+                return 'RADIO';
+            case 'Checkboxes':
+                return 'CHECKBOX';
+            case 'DatePicker':
+                return 'DATE';
+            case 'PhoneNumber':
+                return 'PHONE';
+            case 'EmailInput':
+                return 'EMAIL';
             default:
                 return 'TEXT';
         }
@@ -377,8 +386,8 @@ export class FormBuilderAdapter {
     private static mapOptions(
         options: Array<{ value: string; text: string; key: string }>
     ): BackendOption[] {
-        return options.map((opt:any) => ({
-            id: opt.id || this.generateId(),
+        return options.map((opt) => ({
+            id: opt.key || this.generateId(),
             option: opt.text,
         }));
     }
@@ -438,6 +447,50 @@ export class FormBuilderAdapter {
                     element: 'TextArea',
                     text: 'Multi-line Input',
                 };
+            case 'RADIO':
+                return {
+                    ...baseElement,
+                    element: 'RadioButtons',
+                    text: 'Multiple Choice',
+                    options: field.listoptions.map((opt) => ({
+                        value: opt.option.toLowerCase().replace(/\s+/g, '_'),
+                        text: opt.option,
+                        key: `radiobuttons_option_${this.generateId()}`,
+                    })),
+                };
+            case 'CHECKBOX':
+                return {
+                    ...baseElement,
+                    element: 'Checkboxes',
+                    text: 'Checkboxes',
+                    inline: true,
+                    options: field.listoptions.map((opt) => ({
+                        value: opt.option.toLowerCase().replace(/\s+/g, '_'),
+                        text: opt.option,
+                        key: `checkboxes_option_${this.generateId()}`,
+                    })),
+                };
+            case 'DATE':
+                return {
+                    ...baseElement,
+                    element: 'DatePicker',
+                    text: 'Date',
+                    dateFormat: 'MM/dd/yyyy',
+                    timeFormat: 'hh:mm aa',
+                    showTimeSelect: false,
+                };
+            case 'PHONE':
+                return {
+                    ...baseElement,
+                    element: 'PhoneNumber',
+                    text: 'Phone Number',
+                };
+            case 'EMAIL':
+                return {
+                    ...baseElement,
+                    element: 'EmailInput',
+                    text: 'Email',
+                };
             default:
                 return {
                     ...baseElement,
@@ -448,7 +501,7 @@ export class FormBuilderAdapter {
     }
 
     private static generateId(): string {
-        return 'doc-xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
             const r = (Math.random() * 16) | 0;
             const v = c === 'x' ? r : (r & 0x3) | 0x8;
             return v.toString(16);
@@ -456,13 +509,14 @@ export class FormBuilderAdapter {
     }
 
     /**
-   * Prepares form data for saving to the backend
-   * @param formTitle The title of the form/document
-   * @param templateId The ID of the template being used
-   * @param workflowId The ID of the workflow (if applicable)
-   * @param fieldValues Array of field values from the form
-   * @returns Properly formatted save request object
-   */
+     * Prepares form data for saving to the backend
+     * @param formTitle The title of the form/document
+     * @param formDescription Description of the form/document
+     * @param templateId The ID of the template being used
+     * @param workflowId The ID of the workflow (if applicable)
+     * @param fieldValues Array of field values from the form
+     * @returns Properly formatted save request object
+     */
     static prepareSaveRequest(
         formTitle: string,
         formDescription: string,
@@ -488,15 +542,12 @@ export class FormBuilderAdapter {
      * @returns Array of field values with their IDs and values
      */
     static extractFieldValues(formData: any): FieldValue[] {
-        // This implementation depends on how your form data is structured
-        // Here's a basic implementation that would need to be adapted
-
         const fieldValues: FieldValue[] = [];
 
-        // Example implementation - you'll need to adjust this based on your actual form structure
+        // Example implementation - adjust based on your actual form structure
         for (const fieldName in formData) {
             if (formData.hasOwnProperty(fieldName)) {
-                // Extract the ID from the field name or get it from somewhere else
+                // Extract the ID from the field name or generate a new one
                 const id = this.extractIdFromFieldName(fieldName) || this.generateId();
 
                 fieldValues.push({
@@ -515,10 +566,49 @@ export class FormBuilderAdapter {
         // Implement logic to extract ID from your field names
         // Example: if field names are like "text_d3ea6d30-fe89-4e43-9e06-c1e685f30f59"
         const parts = fieldName.split('_');
-        if (parts.length > 1 && parts[1].match(/^[0-9a-f-]+$/)) {
-            return parts.slice(1).join('_');
+        const potentialId = parts[parts.length - 1];
+
+        // Check if the last part looks like a UUID
+        if (potentialId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+            return potentialId;
         }
         return null;
     }
-
 }
+
+/* / ==================== USAGE EXAMPLE ====================
+
+// Example usage for parsing the form JSON
+const formJson = require('./FORM.json'); // Or your actual import method
+const formData: ReactFormBuilderData = {
+    task_data: formJson as ReactFormElement[]
+};
+
+// Example usage for saving document data
+const formTitle = "Account Registration";
+const formDescription = "Policy holder registration form";
+const templateId = "0000-0000-0000-0000";
+const workflowId = "0000-0000-0000-0000";
+
+// Sample field values (would come from your form submission)
+const fieldValues: FieldValue[] = [
+    {
+        id: "d2532870-fed9-4764-935c-b0f40cdf2f87",
+        name: "select_list_d2532870-fed9-4764-935c-b0f40cdf2f87",
+        custom_name: "select_list_d2532870-fed9-4764-935c-b0f40cdf2f87",
+        value: "north,_east"
+    },
+    // ... other field values
+];
+
+const saveRequest = FormBuilderAdaptor.prepareSaveRequest(
+    formTitle,
+    formDescription,
+    templateId,
+    workflowId,
+    fieldValues
+);
+
+console.log('Save Request:', JSON.stringify(saveRequest, null, 2));
+
+*/
