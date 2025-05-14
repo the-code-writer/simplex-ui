@@ -1,5 +1,5 @@
 import { CheckCircleFilled } from "@ant-design/icons";
-import { Button, Card, Col, Flex, Progress, Row, Space } from "antd";
+import { Button, Card, Col, Flex, Progress, Row, Space, Tag } from "antd";
 import { useEffect } from "react";
 
 const JobsWrapper = (params: any) => {
@@ -29,7 +29,9 @@ const JobsWrapper = (params: any) => {
                     <strong>{jobItem.title}</strong>
                   </span>
                   <br />
-                  <span className="job-number">Job #: 23434</span>
+                      <span className="job-number">Job #: 23434</span>
+                      <br />
+                      <Tag color="blue">blue</Tag>
                 </Card>
               ))}
             </Col>
