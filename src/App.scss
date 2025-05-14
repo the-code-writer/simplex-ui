@@ -777,3 +777,23 @@ h1.ant-typography,
 .react-form-builder-form .rfb-item label span {
   background: transparent !important;
 }
+
+.ant-card:not(.ant-card-bordered) {
+  box-shadow: 1px 2px 8px #0000001a;
+}
+
+.job-card, .job-task {
+
+  .ant-card-body {
+    padding: 16px !important;
+    border-radius: 0 0 8px 8px;
+  }
+
+}
+
+.job-card:hover, .job-task:hover {
+
+  cursor: pointer;
+    box-shadow: 2px 2px 16px #0415291f !important;
+
+}

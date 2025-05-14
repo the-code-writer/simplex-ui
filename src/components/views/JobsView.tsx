@@ -1,4 +1,4 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps } from "antd";
+import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Collapse, CollapseProps } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 //import { documentItems } from "../../libs/documentItemGenerator";
@@ -8,6 +8,9 @@ import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import { FormBuilderAdaptor } from "../../libs/FormBuilderAdaptor.ts";
 import JobListItem from '../JobListItem';
 
+import { CSSTransition } from "react-transition-group";
+import Analysis from '../analysis/index';
+import JobsWrapper from '../analysis/components/JobsWrapper';
 const api = new AxiosAPI();
 
 const breadcrumbItems = [
@@ -115,7 +118,9 @@ const DocumentsView = (params: any) => {
         children: "",
       },
     ];
-    
+  
+  const [isExpanded, setIsExpanded] = useState(false);
+ 
   return (
     <>
       <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
@@ -156,51 +161,81 @@ const DocumentsView = (params: any) => {
                 borderRadius: borderRadiusLG,
                 width: "100%",
                 display: "flex",
+                flexDirection: "column",
+                alignContent: "space-between",
+                flexWrap: "nowrap",
+                justifyContent: "flex-start",
+                alignItems: "stretch",
               }}
             >
-              <Tabs
-                defaultActiveKey="1"
-                items={tabItems}
-                onChange={onTabChange}
-              />
-              <Flex gap="small" wrap>
-                <Button
-                  type="primary"
-                  onClick={() => (window.location.href = "/documents/jobs/new")}
-                >
-                  New Job
-                </Button>
-              </Flex>
+              <div
+                style={{
+                  display: "flex",
+                  width: "100%",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  alignContent: "center",
+                  flexDirection: "row",
+                  flexWrap: "nowrap",
+                }}
+              >
+                <Tabs
+                  defaultActiveKey="1"
+                  items={tabItems}
+                  onChange={onTabChange}
+                />
+                <Flex gap="small" wrap>
+                  <Button
+                    type="default"
+                    onClick={() => {
+                      setIsExpanded(!isExpanded);
+                    }}
+                  >
+                    {isExpanded ? <>Hide</> : <>Show</>} Dashboard
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={() =>
+                      (window.location.href = "/documents/jobs/new")
+                    }
+                  >
+                    New Job
+                  </Button>
+                </Flex>
+              </div>
+              <CSSTransition
+                in={isExpanded}
+                timeout={1000}
+                classNames="collapse"
+                unmountOnExit
+              >
+                <div className="content" style={{ marginTop: 24 }}>
+                  <Title level={1}>Dashboard</Title>
+                  <Analysis
+                    dashboardAndanalysis={{
+                      visitData: [],
+                      visitData2: [],
+                      salesData: [],
+                      searchData: [],
+                      offlineData: [],
+                      offlineChartData: [],
+                      salesTypeData: [],
+                      salesTypeDataOnline: [],
+                      salesTypeDataOffline: [],
+                      radarData: [],
+                    }}
+                    loading={false}
+                  />
+                </div>
+              </CSSTransition>
             </div>
           </Col>
         </Row>
 
         <div className="h-24"></div>
 
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {documentItems.map((docItem: any, docIndex: number) => (
-            <Col
-              id={docItem.id}
-              key={docIndex}
-              className="gutter-row"
-              xs={24}
-              sm={24}
-              md={24}
-              lg={24}
-              xl={24}
-            >
-              <JobListItem
-                api={api}
-                captureAndSaveFormData={captureAndSaveFormData}
-                docItem={docItem}
-                documentId={documentId}
-                setModal3Open={setModal3Open}
-                setModal4Open={setModal4Open}
-                setModal5Open={setModal5Open}
-              />
-            </Col>
-          ))}
-        </Row>
+        <JobsWrapper jobItems={documentItems} />
+        
       </Content>
     </>
   );

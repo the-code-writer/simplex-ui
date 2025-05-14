@@ -15,10 +15,12 @@ import {
   HeatMapOutlined,
   HomeOutlined,
   InboxOutlined,
+  KeyOutlined,
   LineChartOutlined,
   MailOutlined,
   NotificationOutlined,
   PhoneOutlined,
+  QuestionCircleOutlined,
   SettingOutlined,
   ShareAltOutlined,
   UserOutlined,
@@ -65,6 +67,7 @@ import WorkflowStageTasksView from "./components/views/WorkflowStageTasksView";
 import UsersView from "./components/views/UsersView";
 import UserRolesView from "./components/views/UserRolesView";
 import LoginView from "./components/LoginView";
+import DashboardView from "./components/views/DashboardView";
 const { Header, Footer, Sider } = Layout;
 
 const { Title } = Typography;
@@ -119,13 +122,13 @@ const items: MenuItem[] = [
   {
     label: "Dashboard",
     classes: "",
-    url: "/service-orders",
-    id: "service_orders",
+    url: "/dashboard",
+    id: "dashboard",
     icon: AppstoreOutlined,
   },
 
   {
-    label: "Documents",
+    label: "Manage Documents",
     classes: "",
     url: "/document-management",
     id: "document_management",
@@ -180,7 +183,7 @@ const items: MenuItem[] = [
   },
 
   {
-    label: "Jobs",
+    label: "Manage Jobs",
     classes: "",
     url: "/jobs-management",
     id: "jobs_management",
@@ -242,7 +245,7 @@ const items: MenuItem[] = [
   },
 
   {
-    label: "Users Roles",
+    label: "User Roles",
     classes: "",
     url: "/roles-management",
     id: "roles_management",
@@ -265,9 +268,9 @@ const items: MenuItem[] = [
     ],
   },
 
-  { label: "Analytics", classes: "", url: "", id: "", icon: LineChartOutlined },
   { label: "Reports", classes: "", url: "", id: "", icon: FileTextOutlined },
-  { label: "Support", classes: "", url: "", id: "", icon: HeatMapOutlined },
+  { label: "Help", classes: "", url: "", id: "", icon: QuestionCircleOutlined },
+  { label: "Manage Security", classes: "", url: "", id: "", icon: KeyOutlined },
 ].map((item, index) => ({
   key: String(index + 1),
   itemx: item,
@@ -452,7 +455,13 @@ const App: React.FC = () => {
     }, 1000);
   }, []);
 
-  useEffect(() => {}, []);
+  const [menuSelectedIndex, setMenuSelectedIndex] = useState(["1"]);
+
+  useEffect(() => {
+
+    setMenuSelectedIndex(["3"]);
+
+  }, []);
 
   const onSearch: SearchProps["onSearch"] = (value, _e, info) =>
     console.log(info?.source, value);
@@ -539,7 +548,7 @@ const App: React.FC = () => {
                 <Menu
                   theme="dark"
                   mode="inline"
-                  defaultSelectedKeys={["1"]}
+                  defaultSelectedKeys={[menuSelectedIndex]}
                   items={items}
                   onSelect={menuClicked}
                 />
@@ -625,6 +634,9 @@ const App: React.FC = () => {
                       setModal4Open={setModal4Open}
                       setModal5Open={setModal5Open}
                     />
+                  </Route>
+                  <Route path="/dashboard">
+                    <DashboardView />
                   </Route>
                   <Route path="/documents/list">
                     <DocumentsView />
