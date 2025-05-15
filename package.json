@@ -32,6 +32,7 @@
     "react-form-builder2": "^0.18.4",
     "react-infinite-scroll-component": "^6.1.0",
     "react-router-dom": "5.3.3",
+    "react-simple-wysiwyg": "^3.2.2",
     "react-transition-group": "^4.4.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",

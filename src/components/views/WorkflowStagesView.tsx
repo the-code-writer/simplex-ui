@@ -74,10 +74,17 @@ const WorkflowStagesView = (params: any) => {
           workflowId,
           [listViewItemsList]
         );
-        const sortedListItems = listViewItemsList.sort(
-          (a:any, b:any) => a.stageorder - b.stageorder
-        );
-        setListViewItems(sortedListItems);
+        if (listViewItemsList.length > 0) {
+          const sortedListItems = listViewItemsList.sort(
+            (a:any, b:any) => a.stageorder - b.stageorder
+          );
+          setListViewItems(sortedListItems);
+        } else {
+          console.log(
+            "Empty Workflow Stages", 
+          );
+        }
+        
       })
       .catch((error) => {
         console.error("Retrieval failed:", error);
@@ -228,7 +235,7 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
         <div className="h-24"></div>
 
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {listViewItems.length > 0 ? (
+          {Array.isArray(listViewItems) && listViewItems.length > 0 ? (
             <>
               {listViewItems.map((listViewItem: any, listItemIndex: number) => (
                 <Col

@@ -11045,6 +11045,11 @@ react-signature-canvas@^1.0.3:
     signature_pad "^2.3.2"
     trim-canvas "^0.1.0"
 
+react-simple-wysiwyg@^3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/react-simple-wysiwyg/-/react-simple-wysiwyg-3.2.2.tgz#737e2554207f26b391354f3a5ac98c06f403bc12"
+  integrity sha512-mHngkK1IgkZ/CVdGe6XRtE+w1Fr4U3nVN/Yynj7S+xN/uiVJEI/x0jug/nVMN9jJ/KoveL4dM0/ZLiS7HGz93g==
+
 react-textarea-autosize@^7.1.2:
   version "7.1.2"
   resolved "https://registry.npmjs.org/react-textarea-autosize/-/react-textarea-autosize-7.1.2.tgz"

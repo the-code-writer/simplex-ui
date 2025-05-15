@@ -22,6 +22,9 @@ import {
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
+import { AxiosAPI } from '../libs/AxiosAPI';
+
+const api = new AxiosAPI();
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -93,8 +96,6 @@ const UserRolesListItem: React.FC = (params: any) => {
     useState(false);
 
   const [listItemEditorModalOpen, setListItemEditorModalOpen] = useState(false);
-
-  useEffect(() => {}, [listItem]);
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     console.log("click ::: 1", e);

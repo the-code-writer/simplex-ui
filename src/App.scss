@@ -54,7 +54,6 @@
 .h-96 {
   height: 96px;
 }
-
 .single-liner {
 
   /* Spacing between letters */
@@ -66,6 +65,16 @@
   /* Add ellipsis (...) if text overflows */
 }
 
+.double-liner {
+
+  /* Spacing between letters */
+  white-space: nowrap;
+  /* Prevent text from wrapping to the next line */
+  overflow: hidden;
+  /* Hide overflow text */
+  text-overflow: ellipsis;
+  /* Add ellipsis (...) if text overflows */
+}
 .text-right {
   text-align: right;
 }

@@ -11,12 +11,17 @@ import {
   Modal,
   Row,
   Space,
+  Switch,
+  Tag,
   theme,
 } from "antd";
 import { FileOutlined, FlagOutlined, InboxOutlined, EllipsisOutlined } from '@ant-design/icons';
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
+import Editor from "react-simple-wysiwyg";
+import { AxiosAPI } from '../libs/AxiosAPI';
+const api = new AxiosAPI();
 
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
@@ -136,12 +141,16 @@ const items: MenuProps["items"] = [
 
   const [newItemDescription, setNewItemDescription] = useState(listItem.description);
 
+  const [newItemStatus, setNewItemStatus] = useState(listItem.status !== 'DRAFT');
+
   const saveListItem = async () => {
     console.log("Save Request:", [newItemTitle, newItemDescription]);
 
-    const docResponse = await api.saveWorkflow(
+    const docResponse = await api.editWorkflow(
+      listItem.id,
       newItemTitle,
-      newItemDescription
+      newItemDescription,
+      newItemStatus ? "PUBLISHED" : "UNPUBLISHED"
     );
 
     console.log("docResponse:", docResponse);
@@ -170,7 +179,15 @@ const items: MenuProps["items"] = [
             </div>
             <div className="label-value-pair doc-description">
               <span className="label">Description:</span>
-              <span className="value multi-liner">{listItem.description}</span>
+              <span className="value double-liner">
+                {String(listItem.description).replace(/<[^>]*>/g, "")}
+              </span>
+            </div>
+            <div className="label-value-pair doc-description">
+              <span className="label">Number of Documents:</span>
+              <span className="value double-liner">
+                {listItem.workflowDocumentTemplates.length}
+              </span>
             </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={9} lg={9} xl={9}>
@@ -186,7 +203,9 @@ const items: MenuProps["items"] = [
             </div>
             <div className="label-value-pair doc-status">
               <span className="label">Current Status:</span>
-              <span className="value single-liner">Draft</span>
+              <span className="value single-liner">
+                <Tag>{listItem.status}</Tag>
+              </span>
             </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={1} lg={1} xl={1}>
@@ -218,7 +237,7 @@ const items: MenuProps["items"] = [
         centered
         title="Edit Workflow"
         style={{ top: 20 }}
-        width={750}
+        width={1240}
         open={listItemEditorModalOpen}
         onOk={() => saveListItem()}
         onCancel={() => setListItemEditorModalOpen(false)}
@@ -246,7 +265,7 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Workflow Title:</span>
+                      <span className="input-label">Title:</span>
                       <Input
                         size="large"
                         className="w-100"
@@ -267,13 +286,34 @@ const items: MenuProps["items"] = [
                   >
                     <div className="input-wrapper">
                       <span className="input-label">Workflow Description:</span>
-                      <TextArea
-                        size="large"
+                      <Editor
                         className="w-100"
                         placeholder="Enter your workflow description here"
                         value={newItemDescription}
-                        onChange={(e) => setNewItemDescription(e.target.value)}
-                        autoSize={{ minRows: 2, maxRows: 6 }}
+                        onChange={(e) => {
+                          setNewItemDescription(e.target.value);
+                        }}
+                      />
+                    </div>
+                  </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
+                  >
+                    <div className="input-wrapper">
+                      <span className="input-label">
+                        This workflow is published:{" "}
+                      </span>
+                      <Switch
+                        title="This workflow is published"
+                        checked={newItemStatus}
+                        onChange={(published: boolean) => {
+                          setNewItemStatus(published);
+                        }}
                       />
                     </div>
                   </Col>
@@ -288,6 +328,7 @@ const items: MenuProps["items"] = [
         centered
         title="Workflow Details"
         style={{ top: 20 }}
+        width={1240}
         open={listItemDetailsModalOpen}
         onOk={() => setListItemDetailsModalOpen(false)}
         onCancel={() => setListItemDetailsModalOpen(false)}
@@ -315,8 +356,9 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">Workflow Title: </span>
-                      {listItem.title}
+                      <h2>
+                        <strong>{listItem.title}</strong>
+                      </h2>
                     </div>
                   </Col>
 
@@ -329,10 +371,53 @@ const items: MenuProps["items"] = [
                     xl={24}
                   >
                     <div className="input-wrapper">
-                      <span className="input-label">
-                        Workflow Description:{" "}
-                      </span>
-                      {listItem.description}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: listItem.description,
+                        }}
+                      />
+                    </div>
+                    <br />
+                    <hr />
+                    <br />
+                  </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
+                  >
+                    <div className="input-wrapper">
+                      <span className="input-label">Number Of Documents: </span>
+                      {listItem.workflowDocumentTemplates.length}
+                    </div>
+                  </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
+                  >
+                    <div className="input-wrapper">
+                      <span className="input-label">Number Of Stages: </span>
+                      {listItem.workflowStageCount}
+                    </div>
+                  </Col>
+                  <Col
+                    className="gutter-row mb-16px"
+                    xs={24}
+                    sm={24}
+                    md={24}
+                    lg={24}
+                    xl={24}
+                  >
+                    <div className="input-wrapper">
+                      <span className="input-label">Status: </span>
+                      <Tag>{listItem.status}</Tag>
                     </div>
                   </Col>
                   <Col

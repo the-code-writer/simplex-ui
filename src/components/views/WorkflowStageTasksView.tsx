@@ -176,7 +176,7 @@ const WorkflowStageTasksView = (params: any) => {
         <div className="h-24"></div>
 
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {listViewItems.length > 0 ? (
+          {Array.isArray(listViewItems) && listViewItems.length > 0 ? (
             <>
               {listViewItems.map((listViewItem: any, listItemIndex: number) => (
                 <Col

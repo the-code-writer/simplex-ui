@@ -71,19 +71,16 @@ const DocumentListItem: React.FC = (params: any) => {
     //
 
     renderForm();
+
   }, [docItem]);
 
   const renderForm = () => {
     if ("listsections" in docItem) {
-      if (docItem.id === "11a50bd2-b2af-425b-bda2-3354b7882587") {
-        docItem.listdocumentsections = docItem.listsections;
-        console.log("DOC ITEM::", docItem);
-        const reactForm = formBuilderAdapter.parseFormData(docItem);
-        console.log("REACT FORM::", reactForm);
-        setFormData(reactForm);
-      } else {
-        console.log("NO REACT FORM::", docItem);
-      }
+      docItem.listdocumentsections = docItem.listsections;
+      console.log("DOC ITEM::", docItem);
+      const reactForm = formBuilderAdapter.parseFormData(docItem);
+      console.log("REACT FORM::", reactForm);
+      setFormData(reactForm);
     }
   };
 

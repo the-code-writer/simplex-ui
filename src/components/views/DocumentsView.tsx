@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI";
 import { FormBuilderAdaptor } from "../../libs/FormBuilderAdaptor.ts";
 import DocumentListItem from '../DocumentListItem';
-
+import NoData from "../NoData";
 const api = new AxiosAPI();
 
 const breadcrumbItems = [
@@ -147,26 +147,36 @@ const DocumentsView = (params: any) => {
         <div className="h-24"></div>
 
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {documentItems.map((docItem: any, docIndex: number) => (
-            <Col
-              id={docItem.id}
-              key={docIndex}
-              className="gutter-row"
-              xs={24}
-              sm={24}
-              md={24}
-              lg={24}
-              xl={24}
-            >
-              <DocumentListItem
-                captureAndSaveFormData={captureAndSaveFormData}
-                docItem={docItem}
-                setModal3Open={setModal3Open}
-                setModal4Open={setModal4Open}
-                setModal5Open={setModal5Open}
-              />
-            </Col>
-          ))}
+          {Array.isArray(documentItems) && documentItems.length > 0 ? (
+            <>
+              {documentItems.map((docItem: any, docIndex: number) => (
+                <Col
+                  id={docItem.id}
+                  key={docIndex}
+                  className="gutter-row"
+                  xs={24}
+                  sm={24}
+                  md={24}
+                  lg={24}
+                  xl={24}
+                >
+                  <DocumentListItem
+                    captureAndSaveFormData={captureAndSaveFormData}
+                    docItem={docItem}
+                    setModal3Open={setModal3Open}
+                    setModal4Open={setModal4Open}
+                    setModal5Open={setModal5Open}
+                  />
+                </Col>
+              ))}
+            </>
+          ) : (
+            <NoData
+              onButtonClick={() => {window.location.href = "/documents/new"}}
+              buttonLabel={"New Document"}
+              description="No documents configured yet"
+            />
+          )}
         </Row>
       </Content>
     </>

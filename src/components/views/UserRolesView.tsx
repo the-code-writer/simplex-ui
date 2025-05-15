@@ -37,7 +37,7 @@ const UserRoleView = (params: any) => {
 
   useEffect(() => {
     api
-      .getUserRole()
+      .getUserRoles()
       .then((listViewItemsList: any) => {
         console.log(
           "All Items: listViewItemsList : UserRole",

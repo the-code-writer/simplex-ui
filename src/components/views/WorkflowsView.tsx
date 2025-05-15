@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import WorkFlowListItem from '../WorkFlowListItem';
 import TextArea from "antd/es/input/TextArea";
-
+import NoData from '../NoData';
+import Editor from "react-simple-wysiwyg";
 const api = new AxiosAPI();
 
 const breadcrumbItems = [
@@ -41,13 +42,24 @@ const WorkflowsView = (params: any) => {
       });
   }, [api]);
 
+  const [workFlowMeta, setWorkFlowMeta] = useState({timestamp: Date.now()});
+  
+  const [workFlowState, setWorkFlowState] = useState("DRAFT");
+  
   const saveListItem = async () => {
    
-    console.log("Save Request:", [newItemTitle, newItemDescription]);
+    console.log("Save Request:", [
+      newItemTitle,
+      newItemDescription,
+      workFlowMeta,
+      workFlowState,
+    ]);
 
     const docResponse = await api.saveWorkflow(
       newItemTitle,
-      newItemDescription
+      newItemDescription,
+      workFlowState,
+      workFlowMeta
     );
 
     console.log("docResponse:", docResponse);
@@ -110,20 +122,30 @@ const WorkflowsView = (params: any) => {
         <div className="h-24"></div>
 
         <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {listViewItems.map((listItem: any, listItemIndex: number) => (
-            <Col
-              id={listItem.id}
-              key={listItemIndex}
-              className="gutter-row"
-              xs={24}
-              sm={24}
-              md={24}
-              lg={24}
-              xl={24}
-            >
-              <WorkFlowListItem listItem={listItem} />
-            </Col>
-          ))}
+          {Array.isArray(listViewItems) && listViewItems.length > 0 ? (
+            <>
+              {listViewItems.map((listItem: any, listItemIndex: number) => (
+                <Col
+                  id={listItem.id}
+                  key={listItemIndex}
+                  className="gutter-row"
+                  xs={24}
+                  sm={24}
+                  md={24}
+                  lg={24}
+                  xl={24}
+                >
+                  <WorkFlowListItem listItem={listItem} />
+                </Col>
+              ))}
+            </>
+          ) : (
+            <NoData
+              onButtonClick={() => setNewWorkflowModalOpen(true)}
+              buttonLabel={"New Workflow"}
+              description="No workflow configured yet"
+            />
+          )}
         </Row>
       </Content>
 
@@ -180,13 +202,11 @@ const WorkflowsView = (params: any) => {
                   >
                     <div className="input-wrapper">
                       <span className="input-label">Workflow Description:</span>
-                      <TextArea
-                        size="large"
+                      <Editor
                         className="w-100"
                         placeholder="Enter your workflow description here"
                         value={newItemDescription}
-                        onChange={(e) => setNewItemDescription(e.target.value)}
-                        autoSize={{ minRows: 2, maxRows: 6 }}
+                        onChange={(e) => { setNewItemDescription(e.target.value); }}
                       />
                     </div>
                   </Col>
@@ -196,7 +216,6 @@ const WorkflowsView = (params: any) => {
           </div>
         </Space>
       </Modal>
-      
     </>
   );
 };

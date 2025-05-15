@@ -151,7 +151,7 @@ export class AxiosAPI {
      * @param baseURL - The base URL for the API
      */
     constructor() {
-        this.baseURL = "http://18.134.9.214:8081/";
+        this.baseURL = "https://simplexgen-api.hyperefficient2.net/";
 
         // Create Axios instance with base configuration
         this.axiosInstance = axios.create({
@@ -253,6 +253,22 @@ export class AxiosAPI {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
                 '/api/v1/document/listbytemplate/' + id
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error getting all document templates:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
+    async getAllDocumentJobsList(): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                '/api/v1/document/all'
             );
             return response.data;
         } catch (error) {
@@ -394,6 +410,22 @@ export class AxiosAPI {
      * Retrieves all document templates
      * @returns Promise containing an array of document templates
      */
+    async getUserAssignedRoles(id:string): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                `/api/v1/userrole/all/`+id
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error getUserAssignedRoles:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
     async getWorkflowStageTasks(id: any): Promise<DocumentTemplateResponse[]> {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
@@ -406,15 +438,28 @@ export class AxiosAPI {
         }
     }
 
-    async saveWorkflow(title: string, description: string): Promise<any> {
+    async saveWorkflow(title: string, description: string, status: string = "DRAFT", meta: any = {}): Promise<any> {
         try {
             const response: AxiosResponse<any> = await this.axiosInstance.post(
                 '/api/v1/workflow',
-                { title, description, tenantid }
+                { title, description, tenantid, status, meta: JSON.stringify(meta) }
             );
             return response.data;
         } catch (error) {
             console.error('Error saving workflow', error);
+            throw error;
+        }
+    }
+
+    async editWorkflow(workflowId:string, title: string, description: string, status: string = "DRAFT", meta: any = {}): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                '/api/v1/workflow/' + workflowId,
+                { title, description, tenantid, status, meta: JSON.stringify(meta) }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error editing workflow', error);
             throw error;
         }
     }
@@ -453,7 +498,20 @@ export class AxiosAPI {
             );
             return response.data;
         } catch (error) {
-            console.error('Error saving workflow', error);
+            console.error('Error saving user', error);
+            throw error;
+        }
+    }
+
+    async updateUser(firstname: string, lastname: string, email: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                '/api/v1/user',
+                { firstname, lastname, email }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error editing user', error);
             throw error;
         }
     }
