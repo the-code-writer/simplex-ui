@@ -15,14 +15,18 @@ import {
   Tag,
   theme,
 } from "antd";
-import { FileOutlined, FlagOutlined, InboxOutlined, EllipsisOutlined } from '@ant-design/icons';
+import {
+  FileOutlined,
+  FlagOutlined,
+  InboxOutlined,
+  EllipsisOutlined,
+} from "@ant-design/icons";
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
 import Editor from "react-simple-wysiwyg";
-import { AxiosAPI } from '../libs/AxiosAPI';
+import { AxiosAPI } from "../libs/AxiosAPI";
 const api = new AxiosAPI();
-
 
 const useStyle = createStyles(({ prefixCls, css }) => ({
   linearGradientButton: css`
@@ -90,7 +94,8 @@ const WorkFlowListItem: any = (params: any) => {
 
   const { styles } = useStyle();
 
-  const [listItemDetailsModalOpen, setListItemDetailsModalOpen] = useState(false);
+  const [listItemDetailsModalOpen, setListItemDetailsModalOpen] =
+    useState(false);
 
   const [listItemEditorModalOpen, setListItemEditorModalOpen] = useState(false);
 
@@ -121,27 +126,30 @@ const WorkFlowListItem: any = (params: any) => {
     }
   };
 
-const items: MenuProps["items"] = [
-  {
-    key: "1",
-    label: "View Workflow Details",
-  },
-  {
-    key: "2",
-    label: "View Workflow Stages",
-  },
-  {
-    key: "3",
-    label: "Edit Workflow",
-  },
-];
-  
-  
+  const items: MenuProps["items"] = [
+    {
+      key: "1",
+      label: "View Workflow Details",
+    },
+    {
+      key: "2",
+      label: "View Workflow Stages",
+    },
+    {
+      key: "3",
+      label: "Edit Workflow",
+    },
+  ];
+
   const [newItemTitle, setNewItemTitle] = useState(listItem.title);
 
-  const [newItemDescription, setNewItemDescription] = useState(listItem.description);
+  const [newItemDescription, setNewItemDescription] = useState(
+    listItem.description
+  );
 
-  const [newItemStatus, setNewItemStatus] = useState(listItem.status !== 'DRAFT');
+  const [newItemStatus, setNewItemStatus] = useState(
+    listItem.status !== "DRAFT"
+  );
 
   const saveListItem = async () => {
     console.log("Save Request:", [newItemTitle, newItemDescription]);
@@ -157,7 +165,6 @@ const items: MenuProps["items"] = [
 
     window.location.reload();
   };
-
 
   return (
     <>
@@ -175,17 +182,17 @@ const items: MenuProps["items"] = [
           <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
             <div className="label-value-pair doc-descriptio10n">
               <span className="label">Title:</span>
-              <span className="value multi-liner">{listItem.title}</span>
+              <span className="value single-liner">{listItem.title}</span>
             </div>
             <div className="label-value-pair doc-description">
               <span className="label">Description:</span>
-              <span className="value double-liner">
+              <span className="value single-liner">
                 {String(listItem.description).replace(/<[^>]*>/g, "")}
               </span>
             </div>
             <div className="label-value-pair doc-description">
               <span className="label">Number of Documents:</span>
-              <span className="value double-liner">
+              <span className="value single-liner">
                 {listItem.workflowDocumentTemplates.length}
               </span>
             </div>
@@ -267,6 +274,11 @@ const items: MenuProps["items"] = [
                     <div className="input-wrapper">
                       <span className="input-label">Title:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"

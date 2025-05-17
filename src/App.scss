@@ -800,9 +800,71 @@ h1.ant-typography,
 
 }
 
-.job-card:hover, .job-task:hover {
+.activity-timeline-wrapper {
+  background-color: #ffffff !important;
+  border: transparent !important;
+  box-shadow: 2px 2px 16px #0415291f !important;
+}
 
+.activity-timeline-wrapper
+.job-card,
+.job-task {
+  border: 2px solid transparent !important;
   cursor: pointer;
-    box-shadow: 2px 2px 16px #0415291f !important;
+  box-shadow: 2px 2px 16px #0415291f !important;
 
+.ant-tag {
+    color: #000000AA !important;
+            font-weight: 500;
+  }
+
+  &.active {
+
+        background: #0091ff;
+        border-color: #0091ff !important;
+
+        color: #ffffff !important;
+
+        .ant-tag{
+            color: #ffffff !important;
+            background-color: transparent;
+          }
+  }
+
+}
+
+.job-card:hover,
+.job-task:hover {
+  border: 2px solid #0415292e !important;
+  cursor: pointer;
+  box-shadow: 2px 2px 16px #04152946 !important;
+
+}
+
+.job-card.active:hover,
+.job-task.active:hover {
+
+    border: 2px solid transparent !important;
+
+}
+
+.ant-input-affix-wrapper{
+  display: flex !important;
+}
+
+.mb-4,
+.my-4 {
+  margin-bottom: 1.45rem !important;
+}
+
+.xcard > .ant-card-body{
+  background-image: url(https://dev.supplyzone.ai/static/media/shadow.92a38dce222255d01043.png) !important;
+  background-position-y: 72px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  padding-top: 18px;
+
+  .xscroller{
+    margin-top: 24px;
+  }
 }

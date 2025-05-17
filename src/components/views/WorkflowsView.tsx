@@ -1,24 +1,29 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input } from "antd";
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Tabs,
+  Flex,
+  Button,
+  TabsProps,
+  Space,
+  Modal,
+  Input,
+} from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
-import WorkFlowListItem from '../WorkFlowListItem';
+import WorkFlowListItem from "../WorkFlowListItem";
 import TextArea from "antd/es/input/TextArea";
-import NoData from '../NoData';
+import NoData from "../NoData";
 import Editor from "react-simple-wysiwyg";
 const api = new AxiosAPI();
 
-const breadcrumbItems = [
-  { title: "Home" },
-  { title: "Workflows" }
-];
+const breadcrumbItems = [{ title: "Home" }, { title: "Workflows" }];
 
 const WorkflowsView = (params: any) => {
-  const {
-    colorBgContainer,
-    borderRadiusLG,
-  } = params;
+  const { colorBgContainer, borderRadiusLG } = params;
 
   const { Title } = Typography;
 
@@ -34,7 +39,10 @@ const WorkflowsView = (params: any) => {
     api
       .getWorkflows()
       .then((listViewItemsList: any) => {
-        console.log("All Items: listViewItemsList : Workflows", listViewItemsList);
+        console.log(
+          "All Items: listViewItemsList : Workflows",
+          listViewItemsList
+        );
         setListViewItems(listViewItemsList);
       })
       .catch((error) => {
@@ -42,12 +50,11 @@ const WorkflowsView = (params: any) => {
       });
   }, [api]);
 
-  const [workFlowMeta, setWorkFlowMeta] = useState({timestamp: Date.now()});
-  
+  const [workFlowMeta, setWorkFlowMeta] = useState({ timestamp: Date.now() });
+
   const [workFlowState, setWorkFlowState] = useState("DRAFT");
-  
+
   const saveListItem = async () => {
-   
     console.log("Save Request:", [
       newItemTitle,
       newItemDescription,
@@ -65,7 +72,6 @@ const WorkflowsView = (params: any) => {
     console.log("docResponse:", docResponse);
 
     window.location.reload();
-
   };
 
   const onTabChange = (key: string) => {
@@ -183,6 +189,11 @@ const WorkflowsView = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Workflow Title:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"
@@ -206,7 +217,9 @@ const WorkflowsView = (params: any) => {
                         className="w-100"
                         placeholder="Enter your workflow description here"
                         value={newItemDescription}
-                        onChange={(e) => { setNewItemDescription(e.target.value); }}
+                        onChange={(e) => {
+                          setNewItemDescription(e.target.value);
+                        }}
                       />
                     </div>
                   </Col>

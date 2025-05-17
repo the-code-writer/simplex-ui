@@ -15,11 +15,15 @@ import {
   Space,
   theme,
 } from "antd";
-import { FileOutlined, EllipsisOutlined, UserOutlined } from '@ant-design/icons';
+import {
+  FileOutlined,
+  EllipsisOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
-import { AxiosAPI, CreatedBy } from '../libs/AxiosAPI';
+import { AxiosAPI, CreatedBy } from "../libs/AxiosAPI";
 
 const api = new AxiosAPI();
 
@@ -51,8 +55,6 @@ const useStyle = createStyles(({ prefixCls, css }) => ({
 
 const ReachableContext = createContext<string | null>(null);
 
-
-
 const WorkflowStageListItem: any = (params: any) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -75,7 +77,6 @@ const WorkflowStageListItem: any = (params: any) => {
   const [modalAjaxResultSubTitle, setModalAjaxResultSubTitle] = useState("");
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
-    
     console.log("click ::: 1", e);
 
     console.log("listItem ::: 1", listItem);
@@ -108,21 +109,15 @@ const WorkflowStageListItem: any = (params: any) => {
   };
 
   const moveStepUp = async () => {
-
     const config = {
       title: "Confirm Move Stage",
-      content: (
-        <>
-          `Are you sure you want to Move`
-        </>
-      ),
+      content: <>`Are you sure you want to Move`</>,
     };
 
     const confirmed = await modal.confirm(config);
 
-    console.log("MOVE UP", confirmed)
-
-  }
+    console.log("MOVE UP", confirmed);
+  };
 
   const items: MenuProps["items"] = [
     {
@@ -153,43 +148,40 @@ const WorkflowStageListItem: any = (params: any) => {
     listItem.description
   );
 
-    const [optionsUserRoles, setOptionsUserRoles] = useState([]);
+  const [optionsUserRoles, setOptionsUserRoles] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
+    api
+      .getUserRoles()
+      .then((userRoles: any) => {
+        console.log("All Items: userRoles", userRoles);
 
-      api
-        .getUserRoles()
-        .then((userRoles: any) => {
-          console.log("All Items: userRoles", userRoles);
+        // Transform API response to your desired format
+        const formattedRoles = userRoles.map((roleObj: any) => ({
+          label: roleObj.role,
+          value: roleObj.id,
+          emoji: <UserOutlined />, // or a placeholder if needed
+          desc: roleObj.role,
+        }));
 
-          // Transform API response to your desired format
-          const formattedRoles = userRoles.map((roleObj: any) => ({
-            label: roleObj.role,
-            value: roleObj.id,
-            emoji: <UserOutlined />, // or a placeholder if needed
-            desc: roleObj.role,
-          }));
+        // Append the Super Admin option
+        const updatedRoles = [
+          ...formattedRoles,
+          {
+            label: "Super Admin",
+            value: "admin",
+            emoji: <UserOutlined />,
+            desc: "Admin",
+          },
+        ];
 
-          // Append the Super Admin option
-          const updatedRoles = [
-            ...formattedRoles,
-            {
-              label: "Super Admin",
-              value: "admin",
-              emoji: <UserOutlined />,
-              desc: "Admin",
-            },
-          ];
+        setOptionsUserRoles(updatedRoles);
+      })
+      .catch((error) => {
+        console.error("Retrieval failed:", error);
+      });
+  }, []);
 
-          setOptionsUserRoles(updatedRoles);
-
-        })
-        .catch((error) => {
-          console.error("Retrieval failed:", error);
-        });
-      
-    }, []);
-  
   const saveListItem = async () => {
     console.log("Save Request:", [
       newItemTitle,
@@ -223,7 +215,6 @@ const WorkflowStageListItem: any = (params: any) => {
         });
     });
 
-
     setListItemEditorModalOpen(true);
     setModalAjaxResultOpen(true);
 
@@ -231,7 +222,6 @@ const WorkflowStageListItem: any = (params: any) => {
     setModalAjaxResultSubTitle(
       `Workflow Stage ${newItemTitle} updated successfully!`
     );
-
   };
 
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
@@ -333,6 +323,11 @@ const WorkflowStageListItem: any = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Stage Title:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"

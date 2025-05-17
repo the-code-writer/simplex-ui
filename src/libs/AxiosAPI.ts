@@ -265,6 +265,22 @@ export class AxiosAPI {
      * Retrieves all document templates
      * @returns Promise containing an array of document templates
      */
+    async getDocument(id: any): Promise<DocumentTemplateResponse[]> {
+        try {
+            const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
+                '/api/v1/document/' + id
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error getting document:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Retrieves all document templates
+     * @returns Promise containing an array of document templates
+     */
     async getAllDocumentJobsList(): Promise<DocumentTemplateResponse[]> {
         try {
             const response: AxiosResponse<DocumentTemplateResponse[]> = await this.axiosInstance.get(
@@ -566,6 +582,120 @@ export class AxiosAPI {
             return response.data;
         } catch (error) {
             console.error('Error adding document task', error);
+            throw error;
+        }
+    }
+
+    async addDocumentToWorkFlow(documentid: string, workflowid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.post(
+                `/api/v1/workflow/${workflowid}/add-document`,
+                {
+                    id: documentid
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error adding document to workflow', error);
+            throw error;
+        }
+    }
+
+    async publishDocument(documentid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/documenttemplate/${documentid}/status`,
+                {
+                    status: "PUBLISHED"
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error publishing document', error);
+            throw error;
+        }
+    }
+
+    async unpublishDocument(documentid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/documenttemplate/${documentid}/status`,
+                {
+                    status: "UNPUBLISHED"
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error unpublishing document', error);
+            throw error;
+        }
+    }
+
+    async assignDocumentUser(documentid: string, userid:string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/document/${documentid}`,
+                {
+                    documentid, userid
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assigning custodian of a document', error);
+            throw error;
+        }
+    }
+
+    async assignDocumentRole(documentid: string, roleid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/document/${documentid}`,
+                {
+                    documentid, roleid
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error assigning role of a document', error);
+            throw error;
+        }
+    }
+
+    async archiveDocument(documentid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/document/${documentid}`,
+                {
+                    status: "ARCHIVE"
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error archiving document', error);
+            throw error;
+        }
+    }
+
+    async advanceDocument(documentid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/document/${documentid}/advance`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error advancing document', error);
+            throw error;
+        }
+    }
+
+    async revertDocument(documentid: string): Promise<any> {
+        try {
+            const response: AxiosResponse<any> = await this.axiosInstance.put(
+                `/api/v1/document/${documentid}/revert`
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error reverting document', error);
             throw error;
         }
     }

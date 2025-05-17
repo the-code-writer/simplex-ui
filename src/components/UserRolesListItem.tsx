@@ -22,7 +22,7 @@ import {
 
 import { createStyles } from "antd-style";
 import TextArea from "antd/es/input/TextArea";
-import { AxiosAPI } from '../libs/AxiosAPI';
+import { AxiosAPI } from "../libs/AxiosAPI";
 
 const api = new AxiosAPI();
 
@@ -233,6 +233,11 @@ const UserRolesListItem: React.FC = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Workflow Title:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"

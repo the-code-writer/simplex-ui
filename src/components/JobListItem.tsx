@@ -180,38 +180,8 @@ const JobListItem: React.FC = (params: any) => {
       icon: <FileOutlined />,
     },
     {
-      label: "Publish Job",
-      key: "job_publish",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Unpublish Job",
-      key: "job_unpublish",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Archive Job",
-      key: "job_archive",
-      icon: <FileOutlined />,
-    },
-    {
       label: "Update Task",
       key: "job_update_task",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Advance Job",
-      key: "job_advance",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Revert Job",
-      key: "job_revert",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Move Job",
-      key: "job_move",
       icon: <FileOutlined />,
     },
   ];
@@ -275,7 +245,10 @@ const JobListItem: React.FC = (params: any) => {
   });
 
   useEffect(() => {
+
     console.log("CONVERTED TASKS @@@@@@", stageTasksList);
+
+    /*
 
     const subMenued = {
       label: "Stage Tasks",
@@ -295,6 +268,9 @@ const JobListItem: React.FC = (params: any) => {
       items,
       onClick: handleMenuClick,
     });
+
+    */
+    
   }, [stageTasksList]);
 
   useEffect(() => {

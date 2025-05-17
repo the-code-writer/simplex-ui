@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Button,
   Col,
   ConfigProvider,
   Dropdown,
@@ -8,19 +9,22 @@ import {
   message,
   Modal,
   Row,
+  Space,
+  Tag,
   theme,
 } from "antd";
-import { FileOutlined, FlagOutlined } from "@ant-design/icons";
+import {
+  ExclamationCircleFilled,
+  FileOutlined,
+  FlagOutlined,
+} from "@ant-design/icons";
 
 import { createStyles } from "antd-style";
 
-import qrCode from "../assets/qrcode.png";
-
-import ltzLogo from "../assets/ltz.png";
-
 //import ActivityTimeLine from "./ActivityTimeline";
-import { ReactFormGenerator } from "react-form-builder2";
+
 import { FormBuilderAdapter } from "../libs/FormBuilderAdapter";
+import DocumentCreator from "./DocumentCreator";
 
 const formBuilderAdapter = new FormBuilderAdapter();
 
@@ -71,7 +75,6 @@ const DocumentListItem: React.FC = (params: any) => {
     //
 
     renderForm();
-
   }, [docItem]);
 
   const renderForm = () => {
@@ -84,10 +87,21 @@ const DocumentListItem: React.FC = (params: any) => {
     }
   };
 
+  const handleButtonClickNewJob = () => {
+    window.location.href = "/documents/jobs/new";
+  };
+
+  const handleButtonClickEdit = () => {
+    window.location.href =
+      "/documents/new?documentid=" + docItem.id + "&name=" + docItem.title;
+  };
+
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     message.info("Click on left button.");
     console.log("click left button", e);
   };
+
+  const { confirm } = Modal;
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     console.log("click ::: 1", e.key);
@@ -99,18 +113,37 @@ const DocumentListItem: React.FC = (params: any) => {
         break;
       }
 
-      case "doc_temp_docs": {
-        window.location.href = `/documents/jobs/list?id=${docItem.id}`;
+      case "doc_temp_edit": {
+        window.location.href = `/documents/new?documentid=${docItem.id}&name=${docItem.title}`;
+        console.warn("DOCUMENT ITEM", docItem);
         break;
       }
 
-      case "so_notes": {
-        setModal4Open(true);
+      case "doc_temp_jobs": {
+        window.location.href = `/documents/jobs/list?documentid=${docItem.id}`;
         break;
       }
 
-      case "so_reversion": {
-        setModal5Open(true);
+      case "doc_temp_job_new": {
+        window.location.href = `/documents/jobs/new?documentid=${docItem.id}`;
+        break;
+      }
+
+      case "doc_temp_status": {
+        confirm({
+          title: docItem.status === "PUBLISHED" ? "Unpublish Document" : "Publish Document",
+          icon: <ExclamationCircleFilled />,
+          content: `Are you sure you want to ${
+            docItem.status === "PUBLISHED" ? "Unpublish" : "Publish"
+          } the document?`,
+          centered: true,
+          onOk() {},
+          onCancel() {},
+        });
+        break;
+      }
+
+      case "doc_temp_workflow": {
         break;
       }
 
@@ -122,53 +155,39 @@ const DocumentListItem: React.FC = (params: any) => {
 
   const items: MenuProps["items"] = [
     {
-      label: "View Document Details",
+      label: "View Details",
       key: "doc_temp_details",
       icon: <FileOutlined />,
     },
     {
-      label: "Edit Template",
+      label: "Edit Document",
       key: "doc_temp_edit",
       icon: <FileOutlined />,
     },
     {
       label: "View Jobs",
-      key: "doc_temp_docs",
+      key: "doc_temp_jobs",
       icon: <FileOutlined />,
     },
     {
-      label: "Update Title",
-      key: "update_title",
-      icon: <FlagOutlined />,
-    },
-    {
-      label: "Update Description",
-      key: "update_description",
+      label: "Create New Job",
+      key: "doc_temp_job_new",
       icon: <FileOutlined />,
     },
     {
-      label: "Update Version Number",
-      key: "update_version_number",
+      label:
+        docItem.status === "PUBLISHED"
+          ? "Unpublish Document"
+          : "Publish Document",
+      key: "doc_temp_status",
       icon: <FileOutlined />,
     },
     {
-      label: "Publish Document",
-      key: "publish_template",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Unpublish Document",
-      key: "un_publish_template",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Attach Workflow",
-      key: "attach_workflow",
-      icon: <FileOutlined />,
-    },
-    {
-      label: "Detach Workflow",
-      key: "dettach_workflow",
+      label:
+        docItem.workflows.length === 0
+          ? "Add To Workflow"
+          : "Remove From Workflow",
+      key: "doc_temp_workflow",
       icon: <FileOutlined />,
     },
   ];
@@ -202,7 +221,7 @@ const DocumentListItem: React.FC = (params: any) => {
           width: "100%",
         }}
       >
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+        <Row id={docItem.id} gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
           <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
             <div className="label-value-pair doc-descriptio10n">
               <span className="label">Title:</span>
@@ -210,12 +229,18 @@ const DocumentListItem: React.FC = (params: any) => {
             </div>
             <div className="label-value-pair doc-description">
               <span className="label">Description:</span>
-              <span className="value multi-liner">{docItem.description}</span>
+              <span className="value multi-liner">
+                {String(docItem.description).replace(/<[^>]*>/g, "")}
+              </span>
             </div>
             <div className="label-value-pair doc-version">
-              <span className="label">Version:</span>
+              <span className="label">Workflow Name:</span>
               <span className="value single-liner">
-                {docItem.version || "1.0.0"}
+                {docItem.workflows.length > 0 ? (
+                  <>{docItem.workflows[0].title}</>
+                ) : (
+                  <>None</>
+                )}
               </span>
             </div>
           </Col>
@@ -227,12 +252,15 @@ const DocumentListItem: React.FC = (params: any) => {
             <div className="label-value-pair doc-date-updated">
               <span className="label">Created By:</span>
               <span className="value single-liner">
-                {docItem.createdby.firstname}
+                {docItem.createdby.firstname} {docItem.createdby.lastname}
               </span>
             </div>
             <div className="label-value-pair doc-status">
               <span className="label">Current Status:</span>
-              <span className="value single-liner">Draft</span>
+              <span className="value single-liner">
+                <Tag>{docItem.status || "DRAFT"}</Tag>v{" "}
+                {docItem.version.version || "1.0.0"}
+              </span>
             </div>
           </Col>
           <Col className="gutter-row" xs={24} sm={24} md={2} lg={2} xl={2}>
@@ -264,95 +292,9 @@ const DocumentListItem: React.FC = (params: any) => {
         onOk={() => submitFormData()}
         onCancel={() => setModal1Open(false)}
       >
-        <Flex align="flex-start" justify="space-between">
-          <div>
-            <img src={qrCode} width={96} />
-          </div>
-          <Flex vertical align="flex-end" style={{ width: "100%" }}>
-            <img className="brand-logo" src={ltzLogo} width={150} />
-            <span className="brand-address text-right">
-              Sanctuary House, 04 Fairman Close
-              <br />
-              Mt Pleasant, Harare, Zimbabwe
-              <br />
-              +263 712 400 500, Email: info@sanctuary.co.zw
-            </span>
-          </Flex>
-        </Flex>
 
-        <div className="h-32" />
-        <span className="ant-modal-card-title">{docItem.title}</span>
-        <div className="h-8" />
-        <div
-          className="dashboard-card shadow-1 document-details"
-          style={{
-            padding: 24,
-            textAlign: "left",
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-            <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
-              <div className="label-value-pair doc-description">
-                <span className="label">Title:</span>
-                <span className="value multi-liner">{docItem.title}</span>
-              </div>
-              <div className="label-value-pair doc-description">
-                <span className="label">Description:</span>
-                <span className="value multi-liner">{docItem.description}</span>
-              </div>
-              <div className="label-value-pair doc-version">
-                <span className="label">Version:</span>
-                <span className="value single-liner">{docItem.version}</span>
-              </div>
-            </Col>
-            <Col className="gutter-row" xs={24} sm={24} md={12} lg={12} xl={12}>
-              <div className="label-value-pair doc-date-created">
-                <span className="label">Date Created:</span>
-                <span className="value single-liner">
-                  {docItem.datecreated}
-                </span>
-              </div>
-              <div className="label-value-pair doc-date-updated">
-                <span className="label">Created By:</span>
-                <span className="value single-liner">
-                  {docItem.createdby.firstname}
-                </span>
-              </div>
-              <div className="label-value-pair doc-status">
-                <span className="label">Current Status:</span>
-                <span className="value single-liner">Draft</span>
-              </div>
-            </Col>
-          </Row>
-        </div>
+        <DocumentCreator docItem={docItem} formData={formData} />
 
-        <div className="h-32" />
-        <span className="ant-modal-card-title">Document Form</span>
-        <div className="h-8" />
-        <div
-          className="dashboard-card shadow-1 document-details"
-          style={{
-            padding: 24,
-            textAlign: "left",
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
-          <Row
-            className="form-generator-container"
-            gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}
-          >
-            <ReactFormGenerator
-              form_action="/path/to/submit"
-              form_method="POST"
-              data={formData}
-              onChange={saveFormData}
-              submitButton={<></>}
-            />
-          </Row>
-        </div>
       </Modal>
     </>
   );

@@ -116,16 +116,11 @@ const DocumentsView = (params: any) => {
       },
       {
         key: "2",
-        label: "My Drafts",
+        label: "Recent Jobs",
         children: "",
       },
       {
         key: "3",
-        label: "Unpublished Jobs",
-        children: "",
-      },
-      {
-        key: "4",
         label: "Archived Jobs",
         children: "",
       },
@@ -265,7 +260,7 @@ const DocumentsView = (params: any) => {
                   onButtonClick={() =>
                     (window.location.href = "/documents/jobs/new")
                   }
-                  buttonLabel={"New Workflow"}
+                  buttonLabel={"New Job"}
                   description="No jobs created yet"
                 />
               )}

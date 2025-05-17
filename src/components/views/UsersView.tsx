@@ -1,18 +1,27 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input, Result } from "antd";
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Tabs,
+  Flex,
+  Button,
+  TabsProps,
+  Space,
+  Modal,
+  Input,
+  Result,
+} from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
-import WorkFlowListItem from '../WorkFlowListItem.tsx';
+import WorkFlowListItem from "../WorkFlowListItem.tsx";
 import TextArea from "antd/es/input/TextArea";
-import UserListItem from '../UserListItem';
+import UserListItem from "../UserListItem";
 
 const api = new AxiosAPI();
 
-const breadcrumbItems = [
-  { title: "Home" },
-  { title: "Users" },
-];
+const breadcrumbItems = [{ title: "Home" }, { title: "Users" }];
 
 const UsersView = (params: any) => {
   const { colorBgContainer, borderRadiusLG } = params;
@@ -40,10 +49,7 @@ const UsersView = (params: any) => {
     api
       .getUsers()
       .then((listViewItemsList: any) => {
-        console.log(
-          "All Items: listViewItemsList : Users",
-          listViewItemsList
-        );
+        console.log("All Items: listViewItemsList : Users", listViewItemsList);
         setListViewItems(listViewItemsList);
       })
       .catch((error) => {
@@ -52,9 +58,21 @@ const UsersView = (params: any) => {
   }, [api]);
 
   const saveListItem = async () => {
-    console.log("Save Request:", [firstname, lastname, email, password, roleid]);
+    console.log("Save Request:", [
+      firstname,
+      lastname,
+      email,
+      password,
+      roleid,
+    ]);
 
-    const docResponse = await api.saveUser(firstname, lastname, email, password, roleid);
+    const docResponse = await api.saveUser(
+      firstname,
+      lastname,
+      email,
+      password,
+      roleid
+    );
 
     console.log("docResponse:", docResponse);
 
@@ -63,7 +81,6 @@ const UsersView = (params: any) => {
 
     setModalAjaxResultTitle(`Success!`);
     setModalAjaxResultSubTitle(`User ${firstname} ${lastname} data saved!`);
-
   };
 
   const onTabChange = (key: string) => {
@@ -165,7 +182,6 @@ const UsersView = (params: any) => {
             >
               <Space direction="vertical" size={24} className="w-100">
                 <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-                  
                   <Col
                     className="gutter-row mb-16px"
                     xs={24}
@@ -177,6 +193,11 @@ const UsersView = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">First Name:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter first here"
@@ -197,6 +218,11 @@ const UsersView = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Last Name:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter user last name here"
@@ -217,6 +243,11 @@ const UsersView = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Email:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter user email address here"
@@ -236,7 +267,8 @@ const UsersView = (params: any) => {
                   >
                     <div className="input-wrapper">
                       <span className="input-label">Password:</span>
-                      <Input type="password"
+                      <Input
+                        type="password"
                         size="large"
                         className="w-100"
                         placeholder="Enter user password here"
@@ -256,7 +288,8 @@ const UsersView = (params: any) => {
                   >
                     <div className="input-wrapper">
                       <span className="input-label">Confirm Password:</span>
-                      <Input type="password"
+                      <Input
+                        type="password"
                         size="large"
                         className="w-100"
                         placeholder="Enter user password here"
@@ -265,7 +298,6 @@ const UsersView = (params: any) => {
                       />
                     </div>
                   </Col>
-
                 </Row>
               </Space>
             </div>
@@ -273,21 +305,25 @@ const UsersView = (params: any) => {
         </Space>
       </Modal>
 
-      <Modal
-        centered
-        open={modalAjaxResultOpen}
-        footer={[<></>]}
-      >
+      <Modal centered open={modalAjaxResultOpen} footer={[<></>]}>
         <Result
           status="success"
           title={modalAjaxResultTitle}
           subTitle={modalAjaxResultSubTitle}
           extra={[
-            <Button type="primary" key="console" onClick={() => { setModalAjaxResultOpen(false); window.location.reload();  }}>Close</Button>,
+            <Button
+              type="primary"
+              key="console"
+              onClick={() => {
+                setModalAjaxResultOpen(false);
+                window.location.reload();
+              }}
+            >
+              Close
+            </Button>,
           ]}
         />
       </Modal>
-
     </>
   );
 };

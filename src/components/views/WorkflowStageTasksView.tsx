@@ -1,4 +1,18 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input, Result, Checkbox, CheckboxProps } from "antd";
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Tabs,
+  Flex,
+  Button,
+  TabsProps,
+  Space,
+  Modal,
+  Input,
+  Result,
+  Checkbox,
+  CheckboxProps,
+} from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -75,7 +89,6 @@ const WorkflowStageTasksView = (params: any) => {
   }, [api]);
 
   const saveListItem = async () => {
-
     console.log("Save Request:", [newItemTitle, newItemDescription, roleid]);
 
     const docResponse = await api.saveWorkflowStageTask(
@@ -113,7 +126,8 @@ const WorkflowStageTasksView = (params: any) => {
     },
   ];
 
-  const [moveToPreviousChangeValue, setMoveToPreviousChangeValue] = useState(false);
+  const [moveToPreviousChangeValue, setMoveToPreviousChangeValue] =
+    useState(false);
 
   const onMoveToPreviousChange: CheckboxProps["onChange"] = (e: any) => {
     console.log(`onMoveToPreviousChange checked = ${e.target.checked}`);
@@ -123,8 +137,7 @@ const WorkflowStageTasksView = (params: any) => {
     }
   };
 
-  const [moveToNextChangeValue, setMoveToNextChangeValue] =
-    useState(false);
+  const [moveToNextChangeValue, setMoveToNextChangeValue] = useState(false);
 
   const onMoveToNextChange: CheckboxProps["onChange"] = (e: any) => {
     console.log(`onMoveToNextChange checked = ${e.target.checked}`);
@@ -240,6 +253,11 @@ const WorkflowStageTasksView = (params: any) => {
                     <div className="input-wrapper">
                       <span className="input-label">Task Name:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"
@@ -255,7 +273,8 @@ const WorkflowStageTasksView = (params: any) => {
                     md={24}
                     lg={24}
                     xl={24}
-                  ><hr />
+                  >
+                    <hr />
                   </Col>
                   <Col
                     className="gutter-row mb-16px"

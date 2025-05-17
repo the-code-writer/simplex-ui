@@ -1,10 +1,24 @@
-import { Breadcrumb, Row, Col, Tabs, Flex, Button, TabsProps, Space, Modal, Input, Result, Select, message } from 'antd';
+import {
+  Breadcrumb,
+  Row,
+  Col,
+  Tabs,
+  Flex,
+  Button,
+  TabsProps,
+  Space,
+  Modal,
+  Input,
+  Result,
+  Select,
+  message,
+} from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { AxiosAPI } from "../../libs/AxiosAPI.ts";
 import TextArea from "antd/es/input/TextArea";
-import WorkflowStageListItem from '../WorkflowStageListItem.tsx';
+import WorkflowStageListItem from "../WorkflowStageListItem.tsx";
 import NoData from "../NoData.tsx";
 import { UserOutlined } from "@ant-design/icons";
 
@@ -13,7 +27,7 @@ const api = new AxiosAPI();
 import { notification } from "antd";
 import React from "react";
 
-const Context = React.createContext({ name: 'Default' }); 
+const Context = React.createContext({ name: "Default" });
 
 function getUrlParameter<T extends string | number>(name: string): T | null {
   const params = new URLSearchParams(window.location.search);
@@ -43,12 +57,12 @@ const breadcrumbItems = [
 ];
 
 const WorkflowStagesView = (params: any) => {
-
   const { colorBgContainer, borderRadiusLG, listItem } = params;
 
   const { Title } = Typography;
 
-  const [newWorkflowStageModalOpen, setNewWorkflowStageModalOpen] = useState(false);
+  const [newWorkflowStageModalOpen, setNewWorkflowStageModalOpen] =
+    useState(false);
 
   const [modalAjaxResultOpen, setModalAjaxResultOpen] = useState(false);
 
@@ -65,7 +79,6 @@ const WorkflowStagesView = (params: any) => {
   const [optionsUserRoles, setOptionsUserRoles] = useState([]);
 
   useEffect(() => {
-
     api
       .getWorkflowStages(workflowId)
       .then((listViewItemsList: any) => {
@@ -76,20 +89,17 @@ const WorkflowStagesView = (params: any) => {
         );
         if (listViewItemsList.length > 0) {
           const sortedListItems = listViewItemsList.sort(
-            (a:any, b:any) => a.stageorder - b.stageorder
+            (a: any, b: any) => a.stageorder - b.stageorder
           );
           setListViewItems(sortedListItems);
         } else {
-          console.log(
-            "Empty Workflow Stages", 
-          );
+          console.log("Empty Workflow Stages");
         }
-        
       })
       .catch((error) => {
         console.error("Retrieval failed:", error);
       });
-    
+
     api
       .getUserRoles()
       .then((userRoles: any) => {
@@ -115,12 +125,10 @@ const WorkflowStagesView = (params: any) => {
         ];
 
         setOptionsUserRoles(updatedRoles);
-
       })
       .catch((error) => {
         console.error("Retrieval failed:", error);
       });
-    
   }, []);
 
   const [apiNotification, contextHolder] = notification.useNotification();
@@ -133,7 +141,6 @@ const WorkflowStagesView = (params: any) => {
   };
 
   const saveListItem = async () => {
-
     console.log("Save Request:", [newItemTitle, newItemDescription, roleid]);
 
     const docResponse = await api.saveWorkflowStage(
@@ -166,8 +173,9 @@ const WorkflowStagesView = (params: any) => {
     setModalAjaxResultOpen(true);
 
     setModalAjaxResultTitle(`Success!`);
-    setModalAjaxResultSubTitle(`Workflow Stage ${newItemTitle} saved successfully!`);
-
+    setModalAjaxResultSubTitle(
+      `Workflow Stage ${newItemTitle} saved successfully!`
+    );
   };
 
   const onTabChange = (key: string) => {
@@ -187,83 +195,83 @@ const WorkflowStagesView = (params: any) => {
     },
   ];
 
-
-const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
-
+  const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
 
   return (
     <>
       <Context.Provider value={contextValue}>
-      {contextHolder}
-      <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
-        <Title level={1}>{pageTitle + ": " + name}</Title>
+        {contextHolder}
+        <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
+          <Title level={1}>{pageTitle + ": " + name}</Title>
 
-        <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
+          <Breadcrumb style={{ margin: "16px 0" }} items={breadcrumbItems} />
 
-        <div className="h-8"></div>
+          <div className="h-8"></div>
 
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          <Col className="gutter-row" xs={24} sm={24} md={24} lg={24} xl={24}>
-            <div
-              className="tabs-card shadow-1 hide-tab-contents"
-              style={{
-                padding: "0 24px",
-                textAlign: "left",
-                background: colorBgContainer,
-                borderRadius: borderRadiusLG,
-                width: "100%",
-                display: "flex",
-              }}
-            >
-              <Tabs
-                defaultActiveKey="1"
-                items={tabItems}
-                onChange={onTabChange}
+          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+            <Col className="gutter-row" xs={24} sm={24} md={24} lg={24} xl={24}>
+              <div
+                className="tabs-card shadow-1 hide-tab-contents"
+                style={{
+                  padding: "0 24px",
+                  textAlign: "left",
+                  background: colorBgContainer,
+                  borderRadius: borderRadiusLG,
+                  width: "100%",
+                  display: "flex",
+                }}
+              >
+                <Tabs
+                  defaultActiveKey="1"
+                  items={tabItems}
+                  onChange={onTabChange}
+                />
+                <Flex gap="small" wrap>
+                  <Button
+                    type="primary"
+                    onClick={() => setNewWorkflowStageModalOpen(true)}
+                  >
+                    New Workflow Stage
+                  </Button>
+                </Flex>
+              </div>
+            </Col>
+          </Row>
+
+          <div className="h-24"></div>
+
+          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+            {Array.isArray(listViewItems) && listViewItems.length > 0 ? (
+              <>
+                {listViewItems.map(
+                  (listViewItem: any, listItemIndex: number) => (
+                    <Col
+                      id={listViewItem.id}
+                      key={`${listItemIndex}-${listViewItem.id}`}
+                      className="gutter-row"
+                      xs={24}
+                      sm={24}
+                      md={24}
+                      lg={24}
+                      xl={24}
+                    >
+                      <WorkflowStageListItem
+                        listItemIndex={listItemIndex}
+                        listItem={listViewItem}
+                      />
+                    </Col>
+                  )
+                )}
+              </>
+            ) : (
+              <NoData
+                onButtonClick={() => setNewWorkflowStageModalOpen(true)}
+                buttonLabel={"New Workflow Stage"}
+                description="No workflow stages configured yet"
               />
-              <Flex gap="small" wrap>
-                <Button
-                  type="primary"
-                  onClick={() => setNewWorkflowStageModalOpen(true)}
-                >
-                  New Workflow Stage
-                </Button>
-              </Flex>
-            </div>
-          </Col>
-        </Row>
-
-        <div className="h-24"></div>
-
-        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-          {Array.isArray(listViewItems) && listViewItems.length > 0 ? (
-            <>
-              {listViewItems.map((listViewItem: any, listItemIndex: number) => (
-                <Col
-                  id={listViewItem.id}
-                  key={`${listItemIndex}-${listViewItem.id}`}
-                  className="gutter-row"
-                  xs={24}
-                  sm={24}
-                  md={24}
-                  lg={24}
-                  xl={24}
-                >
-                  <WorkflowStageListItem
-                    listItemIndex={listItemIndex}
-                    listItem={listViewItem}
-                  />
-                </Col>
-              ))}
-            </>
-          ) : (
-            <NoData
-              onButtonClick={() => setNewWorkflowStageModalOpen(true)}
-              buttonLabel={"New Workflow Stage"}
-              description="No workflow stages configured yet"
-            />
-          )}
-        </Row>
-      </Content>
+            )}
+          </Row>
+        </Content>
       </Context.Provider>
 
       <Modal
@@ -300,6 +308,11 @@ const contextValue = useMemo(() => ({ name: "Ant Design" }), []);
                     <div className="input-wrapper">
                       <span className="input-label">Stage Title:</span>
                       <Input
+                        maxLength={64}
+                        count={{
+                          show: true,
+                          max: 56,
+                        }}
                         size="large"
                         className="w-100"
                         placeholder="Enter workflow title here"

@@ -68,6 +68,7 @@ import UsersView from "./components/views/UsersView";
 import UserRolesView from "./components/views/UserRolesView";
 import LoginView from "./components/LoginView";
 import DashboardView from "./components/views/DashboardView";
+import JobCreate from "./components/views/JobCreate";
 const { Header, Footer, Sider } = Layout;
 
 const { Title } = Typography;
@@ -575,24 +576,6 @@ const App: React.FC = () => {
                 </Header>
 
                 <Switch>
-                  <Route path="/service-orders">
-                    <ServiceOrdersView
-                      cards={cards}
-                      colorBgContainer={colorBgContainer}
-                      borderRadiusLG={borderRadiusLG}
-                      tabItems={tabItems}
-                      onTabChange={onTabChange}
-                      setModal2Open={setModal2Open}
-                      setModal1Open={setModal1Open}
-                      itemsToShow={itemsToShow}
-                      loadMoreItems={loadMoreItems}
-                      itemsPerPage={itemsPerPage}
-                      page={page}
-                      setModal3Open={setModal3Open}
-                      setModal4Open={setModal4Open}
-                      setModal5Open={setModal5Open}
-                    />
-                  </Route>
                   <Route path="/dashboard">
                     <DashboardView />
                   </Route>
@@ -617,7 +600,13 @@ const App: React.FC = () => {
                   <Route path="/documents/jobs/list">
                     <JobsView />
                   </Route>
+                  <Route path="/documents/jobs/new">
+                    <JobCreate />
+                  </Route>
                   <Route path="/documents/new">
+                    <DocumentsCreate />
+                  </Route>
+                  <Route path="/documents/edit">
                     <DocumentsCreate />
                   </Route>
                 </Switch>
